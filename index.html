@@ -1,0 +1,2064 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>正欣診所名單成效儀表板</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #18202a;
+      --muted: #657283;
+      --line: #dfe4ea;
+      --brand: #0f766e;
+      --brand-dark: #0b5f59;
+      --accent: #b45309;
+      --danger: #b91c1c;
+      --ok: #15803d;
+      --soft: #edf7f5;
+      --shadow: 0 12px 32px rgba(24, 32, 42, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      min-height: 38px;
+    }
+
+    button:hover { border-color: var(--brand); }
+
+    button.primary {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+
+    button.primary:hover { background: var(--brand-dark); }
+
+    button.danger {
+      color: var(--danger);
+      border-color: #f1c7c7;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      white-space: pre;
+      overflow: auto;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .brand h1 {
+      font-size: 21px;
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat span {
+      color: var(--muted);
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .panel-body { padding: 16px; }
+
+    .stack { display: grid; gap: 12px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    label span { color: var(--muted); }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .drop {
+      border: 1px dashed #9fb5b2;
+      background: var(--soft);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .drop input { background: #fff; }
+
+    .paste-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .mode-strip .active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .mode-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .notice {
+      border-left: 3px solid var(--brand);
+      background: var(--soft);
+      color: #31524e;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(4, minmax(110px, .5fr));
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 620px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      font-size: 14px;
+    }
+
+    table.summary-table { min-width: 760px; }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    td input, td select {
+      min-width: 120px;
+      border-color: transparent;
+      background: transparent;
+      padding: 6px;
+    }
+
+    td input:focus, td select:focus {
+      border-color: var(--brand);
+      background: #fff;
+      outline: none;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: minmax(92px, 130px) 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 9px;
+      background: #e7edf0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      background: var(--brand);
+      border-radius: 999px;
+    }
+
+    .source-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--chip-bg, #eef2f7);
+      color: var(--chip-fg, #334155);
+      border: 1px solid var(--chip-line, rgba(51, 65, 85, .08));
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .monthly-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .monthly-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .monthly-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .monthly-total {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .monthly-table {
+      width: 100%;
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    .monthly-table th,
+    .monthly-table td {
+      padding: 6px 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #eef2f7;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .badge.ok { background: #dcfce7; color: var(--ok); }
+    .badge.warn { background: #ffedd5; color: var(--accent); }
+    .badge.danger { background: #fee2e2; color: var(--danger); }
+
+    .modal {
+      border: 0;
+      border-radius: 8px;
+      max-width: 680px;
+      width: calc(100% - 32px);
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+      padding: 0;
+    }
+
+    .modal::backdrop { background: rgba(15, 23, 42, .45); }
+
+    .modal .panel { border: 0; box-shadow: none; }
+
+    #settingsModal { max-width: 860px; }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 42px 16px;
+    }
+
+    .agency-mode [data-internal-only] {
+      display: none !important;
+    }
+
+    .agency-mode .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .agency-mode main {
+      max-width: 1180px;
+    }
+
+    .agency-mode .brand p::after {
+      content: "｜廣告商檢視僅顯示去個資彙整資料";
+    }
+
+    .agency-mode #summaryRows input {
+      pointer-events: none;
+      border-color: transparent;
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .agency-mode #summaryRows [data-summary-field="source"] {
+      display: none;
+    }
+
+    body:not(.agency-mode) #summaryRows .source-chip {
+      display: none;
+    }
+
+    .agency-share-mode .actions {
+      display: none;
+    }
+
+    .agency-share-mode #viewInternalBtn {
+      display: none;
+    }
+
+    /* 登入 overlay */
+    #loginOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .60);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #loginOverlay .login-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.25);
+      width: 380px;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+    }
+
+    #loginOverlay .login-head {
+      padding: 20px 24px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #loginOverlay .login-head h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+    }
+
+    #loginOverlay .login-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    #loginOverlay .login-body {
+      padding: 20px 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    #loginError {
+      color: var(--danger);
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    /* 載入中遮罩 */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(246, 247, 249, .85);
+      z-index: 150;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--line);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; }
+      .charts { grid-template-columns: 1fr; }
+      .monthly-grid { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar-inner { grid-template-columns: 1fr; }
+      .actions { justify-content: stretch; }
+      .actions button { flex: 1 1 150px; }
+      main { padding: 14px; }
+      .row, .toolbar { grid-template-columns: 1fr; }
+      .mode-note { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <h1>正欣診所名單成效儀表板</h1>
+          <p id="brandSubtitle">名單匯入、渠道追蹤、轉換彙整、主管檢視與 Excel 匯出</p>
+        </div>
+        <div class="actions">
+          <button id="viewAgencyBtn">廣告商檢視</button>
+          <button id="viewInternalBtn">內部後台</button>
+          <button id="settingsBtn" data-internal-only>後台設定</button>
+          <button id="copyAgencyLinkBtn" data-internal-only>複製廣告商連結</button>
+          <button id="addBlankBtn" data-internal-only>新增空白列</button>
+          <button id="summaryBtn" data-internal-only>產生 Claude 摘要</button>
+          <button id="exportPublicBtn" data-internal-only>下載彙整資料</button>
+          <button id="exportBtn" class="primary" data-internal-only>匯出內部名單</button>
+          <button id="clearBtn" class="danger" data-internal-only>清空資料</button>
+          <button id="logoutBtn" data-internal-only style="border-color:#ddd;color:var(--muted)">登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="mode-strip">
+        <span id="modeBadge" class="badge">內部後台</span>
+        <span class="mode-note">內部後台含名單個資；廣告商檢視只顯示去個資彙整。</span>
+      </section>
+
+      <section class="stats" aria-label="名單總覽">
+        <div class="stat" data-internal-only><span>內部總名單</span><strong id="totalLeads">0</strong></div>
+        <div class="stat"><span>已轉換</span><strong id="convertedLeads">0</strong></div>
+        <div class="stat"><span>轉換率</span><strong id="conversionRate">0%</strong></div>
+        <div class="stat"><span>回報總數</span><strong id="publicTotal">0</strong></div>
+        <div class="stat"><span>來源渠道數</span><strong id="publicSourceKinds">0</strong></div>
+        <div class="stat"><span>院區數</span><strong id="publicBranchKinds">0</strong></div>
+        <div class="stat" data-internal-only><span>重複略過</span><strong id="duplicateCount">0</strong></div>
+      </section>
+
+      <section class="grid">
+        <aside class="stack" data-internal-only>
+          <div class="panel">
+            <div class="panel-head">
+              <h2>匯入名單</h2>
+              <span class="badge">Excel / CSV</span>
+            </div>
+            <div class="panel-body stack">
+              <div class="drop">
+                <div class="row">
+                  <label>
+                    <span>匯入類型</span>
+                    <select id="importMode">
+                      <option value="detail">總名單明細（內部用，含個資）</option>
+                      <option value="summary">補充彙整資料（沒有明細時才用）</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>預設院區</span>
+                    <select id="defaultBranch">
+                      <option>自動判斷</option>
+                      <option>台北</option>
+                      <option>台中</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>上傳檔案</span>
+                  <input id="fileInput" type="file" accept=".xlsx,.xls,.csv">
+                </label>
+                <p class="hint">建議以總名單明細為主資料；月報、來源總表與廣告商檢視都會從名單明細自動產生。</p>
+              </div>
+              <div class="notice">廣告商檢視只會看到名單明細自動彙整後的數據，不會顯示姓名與電話。</div>
+              <label>
+                <span>大量貼上</span>
+                <textarea id="pasteBox" placeholder="可直接從 Excel 複製多列貼上。第一列可以是標題列。"></textarea>
+              </label>
+              <div class="paste-tools">
+                <button id="pasteImportBtn" class="primary">匯入貼上內容</button>
+                <button id="downloadTemplateBtn">下載範本</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>單筆新增</h2>
+            </div>
+            <div class="panel-body stack">
+              <div class="row">
+                <label><span>姓名</span><input id="nameInput"></label>
+                <label><span>電話</span><input id="phoneInput"></label>
+              </div>
+              <div class="row">
+                <label><span>院區</span>
+                  <select id="branchInput">
+                    <option>台北</option>
+                    <option>台中</option>
+                  </select>
+                </label>
+                <label><span>建立日期</span><input id="createdAtInput" type="date"></label>
+              </div>
+              <div class="row">
+                <label><span>來源渠道</span><input id="sourceInput" list="sourceList"></label>
+                <label><span>療程</span><input id="campaignInput" list="therapyList"></label>
+              </div>
+              <div class="row">
+                <label><span>狀態</span>
+                  <select id="statusInput">
+                    <option>已聯繫</option>
+                    <option>已轉換</option>
+                    <option>未接通</option>
+                  </select>
+                </label>
+                <label><span>療程補充</span><input id="conversionInput" list="therapyList"></label>
+              </div>
+              <label><span>備註</span><input id="noteInput"></label>
+              <button id="singleAddBtn" class="primary">加入名單</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>渠道排行</h2>
+            </div>
+            <div class="panel-body">
+              <div id="sourceChart" class="bar-list"></div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="stack">
+          <div class="charts">
+            <div class="panel" data-internal-only>
+              <div class="panel-head"><h2>轉換狀態</h2></div>
+              <div class="panel-body"><div id="statusChart" class="bar-list"></div></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><h2>來源總覽</h2></div>
+              <div class="panel-body"><div id="publicSourceChart" class="bar-list"></div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>每月來源總表</h2>
+              <select id="monthReportSelect" style="max-width: 180px;"></select>
+            </div>
+            <div class="panel-body">
+              <div id="monthlyReport" class="monthly-grid"></div>
+            </div>
+          </div>
+
+          <div class="panel" data-internal-only>
+            <div class="panel-head">
+              <h2>名單明細</h2>
+              <span id="visibleCount" class="badge">0 筆</span>
+            </div>
+            <div class="toolbar">
+              <input id="searchInput" placeholder="搜尋姓名、電話、來源、備註">
+              <select id="sourceFilter"><option value="">全部來源</option></select>
+              <select id="statusFilter"><option value="">全部狀態</option></select>
+              <input id="dateFrom" type="date">
+              <input id="dateTo" type="date">
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>建立日期</th>
+                    <th>院區</th>
+                    <th>姓名</th>
+                    <th>電話</th>
+                    <th>來源渠道</th>
+                    <th>療程</th>
+                    <th>狀態</th>
+                    <th>療程補充</th>
+                    <th>備註</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="leadRows"></tbody>
+              </table>
+              <div id="emptyState" class="empty">目前尚無名單，請先上傳 Excel 或貼上資料。</div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <datalist id="sourceList">
+    <option value="Facebook 廣告"></option>
+    <option value="Instagram"></option>
+    <option value="Google 搜尋"></option>
+    <option value="YouTube"></option>
+    <option value="Threads"></option>
+    <option value="LP 表單"></option>
+    <option value="網路名單"></option>
+    <option value="官網表單"></option>
+    <option value="Super8"></option>
+    <option value="電話來電"></option>
+    <option value="現場諮詢"></option>
+    <option value="親友介紹"></option>
+    <option value="醫師介紹"></option>
+    <option value="不清楚來源"></option>
+    <option value="其他"></option>
+  </datalist>
+
+  <datalist id="therapyList">
+    <option value="血液淨化 / DFPP"></option>
+    <option value="EECP"></option>
+    <option value="Super8"></option>
+    <option value="猛健樂 / 減重"></option>
+    <option value="精準健檢"></option>
+    <option value="基因檢測"></option>
+    <option value="靜脈雷射 / OLIB"></option>
+    <option value="氫氧療程"></option>
+    <option value="血管檢測"></option>
+    <option value="女性賀爾蒙"></option>
+    <option value="再生療法"></option>
+    <option value="生活飲食規劃"></option>
+    <option value="其他 / 待分類"></option>
+  </datalist>
+
+  <dialog id="summaryModal" class="modal">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Claude 摘要草稿</h2>
+        <button id="closeSummaryBtn">關閉</button>
+      </div>
+      <div class="panel-body stack">
+        <p class="hint">正式串 Claude 時，建議用後端保管 API Key。這裡先產生可貼到 Claude 的主管摘要提示詞與目前數據。</p>
+        <textarea id="summaryText"></textarea>
+        <div class="paste-tools">
+          <button id="copySummaryBtn" class="primary">複製摘要</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="settingsModal" class="modal">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>後台設定</h2>
+        <button id="closeSettingsBtn">關閉</button>
+      </div>
+      <div class="panel-body stack">
+        <div class="notice">設定儲存於資料庫，所有設備同步。</div>
+        <label>
+          <span>來源標籤與色系</span>
+          <textarea id="sourceSettingsInput" placeholder="Facebook 廣告=淺橘&#10;電話來電=淺藍"></textarea>
+        </label>
+        <p class="hint">可用色系：淺橘、淺藍、淺綠、淡紫、柔紅、灰。沒有列出的來源會自動歸到灰色。</p>
+        <label>
+          <span>療程自動偵測規則</span>
+          <textarea id="therapySettingsInput" placeholder="血液淨化 / DFPP=血液淨化,血淨,DFPP,膽固醇&#10;EECP=EECP,體外反搏,心血管"></textarea>
+        </label>
+        <p class="hint">格式：療程標籤=關鍵字1,關鍵字2。匯入 Excel 時，只要文字包含關鍵字就會自動套用該療程。</p>
+        <label>
+          <span>院區清單</span>
+          <textarea id="branchSettingsInput" placeholder="台北&#10;台中"></textarea>
+        </label>
+        <div class="paste-tools">
+          <button id="saveSettingsBtn" class="primary">儲存設定</button>
+          <button id="applySettingsBtn">套用到既有名單</button>
+          <button id="exportSettingsBtn">匯出設定</button>
+          <button id="importSettingsBtn">匯入設定</button>
+          <button id="resetSettingsBtn" class="danger">還原預設</button>
+        </div>
+        <input id="settingsFileInput" type="file" accept=".json" style="display:none">
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 登入 Overlay -->
+  <div id="loginOverlay">
+    <div class="login-box">
+      <div class="login-head">
+        <h2>正欣診所 — 內部登入</h2>
+        <p>廣告商請直接使用廣告商連結，無需登入。</p>
+      </div>
+      <div class="login-body">
+        <p id="loginError"></p>
+        <button id="loginGoogleBtn" class="primary" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;font-size:15px;padding:12px 16px;">
+          <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
+            <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.1 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+            <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.5 26.7 36 24 36c-5.3 0-9.7-3-11.3-7.4l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/>
+            <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.4 4.3-4.4 5.6l6.2 5.2C36.9 37 44 32 44 24c0-1.3-.1-2.7-.4-3.9z"/>
+          </svg>
+          用 Google 帳號登入
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 載入中 Overlay -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <span>載入中…</span>
+  </div>
+
+  <!-- CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    // ============================================================
+    // ★ 設定區：請換成你的 Supabase 專案網址與 anon key
+    // ============================================================
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';   // ← 替換
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';               // ← 替換
+    // ============================================================
+
+    const { createClient } = window.supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ── 常數 ────────────────────────────────────────────────────
+    const VIEW_STORAGE_KEY = "chenghsin-dashboard-view-mode";
+    const STATUSES = ["已聯繫", "已轉換", "未接通"];
+    const STATUS_COLORS = {
+      "已聯繫": { bg: "#e8f1fb", fg: "#315f8f", line: "#c9dcef" },
+      "已轉換": { bg: "#e6f4ee", fg: "#2f6f58", line: "#c8e4d8" },
+      "未接通": { bg: "#f7e7e4", fg: "#9a5146", line: "#edccc6" }
+    };
+    const SOURCE_COLORS = {
+      "Facebook 廣告": { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
+      "Instagram":     { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
+      "LP 表單":       { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
+      "Super8":        { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
+      "Google 搜尋":   { bg: "#e4f1eb", fg: "#2d6f58", line: "#c9e0d4" },
+      "官網表單":      { bg: "#e4f1eb", fg: "#2d6f58", line: "#c9e0d4" },
+      "網路名單":      { bg: "#e8eef7", fg: "#3c5f87", line: "#cfdaea" },
+      "免費專線":      { bg: "#e8eef7", fg: "#3c5f87", line: "#cfdaea" },
+      "電話來電":      { bg: "#e8eef7", fg: "#3c5f87", line: "#cfdaea" },
+      "YouTube":       { bg: "#f4e7e4", fg: "#8f5148", line: "#e6cdc8" },
+      "Threads":       { bg: "#edf0f2", fg: "#52606c", line: "#dce1e5" },
+      "現場諮詢":      { bg: "#eee9f4", fg: "#66577d", line: "#ddd4e8" },
+      "親友介紹":      { bg: "#eee9f4", fg: "#66577d", line: "#ddd4e8" },
+      "醫師介紹":      { bg: "#eee9f4", fg: "#66577d", line: "#ddd4e8" },
+      "不清楚來源":    { bg: "#edf0f2", fg: "#52606c", line: "#dce1e5" },
+      "其他":          { bg: "#edf0f2", fg: "#52606c", line: "#dce1e5" },
+      "全部來源":      { bg: "#edf0f2", fg: "#52606c", line: "#dce1e5" }
+    };
+    const SOURCE_TAGS = ["Facebook 廣告", "Instagram", "Google 搜尋", "YouTube", "Threads", "LP 表單", "網路名單", "官網表單", "Super8", "免費專線", "電話來電", "現場諮詢", "親友介紹", "醫師介紹", "不清楚來源", "其他"];
+    const THERAPY_RULES = [
+      { tag: "血液淨化 / DFPP", keywords: ["血液淨化", "血淨", "dfpp", "膽固醇", "ldl", "血脂", "三高", "高血壓", "高血糖", "糖尿病", "慢性"] },
+      { tag: "EECP", keywords: ["eecp", "體外反", "反搏", "反博", "循環不佳", "手腳冰冷", "容易疲勞", "疲勞", "心血管"] },
+      { tag: "Super8", keywords: ["super8", "super 8", "超級8", "超級 8"] },
+      { tag: "猛健樂 / 減重", keywords: ["猛健樂", "減重", "瘦", "體重", "肥胖"] },
+      { tag: "精準健檢", keywords: ["精準健檢", "健康檢查", "健檢", "抽血"] },
+      { tag: "基因檢測", keywords: ["基因"] },
+      { tag: "靜脈雷射 / OLIB", keywords: ["靜脈雷射", "olib", "雷射"] },
+      { tag: "氫氧療程", keywords: ["氫氧"] },
+      { tag: "血管檢測", keywords: ["血管檢測", "血管硬化", "免費血管"] },
+      { tag: "女性賀爾蒙", keywords: ["女性賀爾蒙", "賀爾蒙"] },
+      { tag: "再生療法", keywords: ["再生療法", "再生"] },
+      { tag: "生活飲食規劃", keywords: ["生活飲食", "飲食規劃"] }
+    ];
+    const FIELD_ALIASES = {
+      branch:    ["院區", "分院", "診所", "branch"],
+      name:      ["姓名", "名字", "客戶姓名", "名單姓名", "name"],
+      phone:     ["電話", "手機", "手機號碼", "聯絡電話", "phone", "mobile"],
+      source:    ["來源", "來源渠道", "渠道", "名單來源", "廣告來源", "介紹來源", "source"],
+      campaign:  ["療程", "活動", "活動名稱", "廣告活動", "諮詢原因", "campaign"],
+      status:    ["狀態", "跟進狀態", "名單狀態", "已轉換正式", "status"],
+      conversion:["轉換", "轉換項目", "成交項目", "療程", "諮詢原因", "conversion"],
+      note:      ["備註", "說明", "note", "notes"],
+      createdAt: ["日期", "建立日期", "新增日期", "createdAt", "created_at"]
+    };
+    const COLOR_PRESETS = {
+      "淺橘": { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
+      "淺藍": { bg: "#e8eef7", fg: "#3c5f87", line: "#cfdaea" },
+      "淺綠": { bg: "#e4f1eb", fg: "#2d6f58", line: "#c9e0d4" },
+      "淡紫": { bg: "#eee9f4", fg: "#66577d", line: "#ddd4e8" },
+      "柔紅": { bg: "#f4e7e4", fg: "#8f5148", line: "#e6cdc8" },
+      "灰":   { bg: "#edf0f2", fg: "#52606c", line: "#dce1e5" }
+    };
+    const DEFAULT_SETTINGS = {
+      sourceGroups: {
+        "Facebook 廣告": "淺橘", "Instagram": "淺橘", "LP 表單": "淺橘", "Super8": "淺橘",
+        "Google 搜尋": "淺綠", "官網表單": "淺綠",
+        "網路名單": "淺藍", "免費專線": "淺藍", "電話來電": "淺藍",
+        "YouTube": "柔紅", "Threads": "灰",
+        "現場諮詢": "淡紫", "親友介紹": "淡紫", "醫師介紹": "淡紫",
+        "不清楚來源": "灰", "其他": "灰", "全部來源": "灰"
+      },
+      therapyRules: THERAPY_RULES,
+      branches: ["台北", "台中"]
+    };
+
+    // ── 應用狀態 ─────────────────────────────────────────────────
+    let leads = [];
+    let summaries = [];
+    let appSettings = structuredClone(DEFAULT_SETTINGS);
+    let duplicateCount = 0;
+    let isAgencyMode = false;
+
+    // ── 輔助 ─────────────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    const today = () => new Date().toISOString().slice(0, 10);
+    const uid = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    // ── Supabase 鍵值存取 ────────────────────────────────────────
+    async function kvGet(key) {
+      try {
+        const { data, error } = await db.from('kv_store').select('value').eq('key', key).single();
+        if (error && error.code !== 'PGRST116') console.warn('kvGet', key, error.message);
+        return data?.value ?? null;
+      } catch (e) {
+        console.error('kvGet exception', e);
+        return null;
+      }
+    }
+
+    async function kvSet(key, value) {
+      try {
+        const { error } = await db.from('kv_store')
+          .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+        if (error) console.warn('kvSet', key, error.message);
+      } catch (e) {
+        console.error('kvSet exception', e);
+      }
+    }
+
+    // ── 資料載入 ─────────────────────────────────────────────────
+    async function loadLeads() {
+      return (await kvGet('leads')) || [];
+    }
+
+    async function loadSummaries() {
+      return (await kvGet('summaries')) || [];
+    }
+
+    async function loadSettings() {
+      const saved = (await kvGet('settings')) || {};
+      return {
+        sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...(saved.sourceGroups || {}) },
+        therapyRules: Array.isArray(saved.therapyRules) && saved.therapyRules.length
+          ? saved.therapyRules : DEFAULT_SETTINGS.therapyRules,
+        branches: Array.isArray(saved.branches) && saved.branches.length
+          ? saved.branches : DEFAULT_SETTINGS.branches
+      };
+    }
+
+    // ── 資料儲存 ─────────────────────────────────────────────────
+    function saveLeads() {
+      kvSet('leads', leads);
+      // 同步更新廣告商公開彙整（去個資）
+      kvSet('public_data', buildPublicData());
+    }
+
+    function saveSummaries() {
+      kvSet('summaries', summaries);
+    }
+
+    function saveSettings() {
+      kvSet('settings', appSettings);
+    }
+
+    function buildPublicData() {
+      // 僅包含彙整統計，不含姓名/電話
+      return {
+        reportingSummaries: getReportingSummaries(),
+        updated: new Date().toISOString()
+      };
+    }
+
+    // ── 業務邏輯（與原版相同）────────────────────────────────────
+    function detectBranch(value) {
+      const text = String(value || "");
+      const matchedBranch = appSettings.branches.find((branch) => text.includes(branch));
+      if (matchedBranch) return matchedBranch;
+      if (text.includes("台中")) return "台中";
+      if (text.includes("台北")) return "台北";
+      const selected = $("defaultBranch")?.value;
+      return selected && selected !== "自動判斷" ? selected : "未分院";
+    }
+
+    function normalizePhone(phone) {
+      return String(phone || "").replace(/[^\d+]/g, "").replace(/^886/, "0");
+    }
+
+    function normalizeName(name) {
+      return String(name || "").trim().replace(/\s+/g, "").toLowerCase();
+    }
+
+    function duplicateKey(lead) {
+      const phone = normalizePhone(lead.phone);
+      const name = normalizeName(lead.name);
+      if (name && phone) return `name-phone:${name}|${phone}`;
+      if (phone) return `phone:${phone}`;
+      if (name) return `name:${name}`;
+      return `fallback:${String(lead.source || "").trim().toLowerCase()}|${String(lead.createdAt || "").trim()}`;
+    }
+
+    function normalizeStatus(status) {
+      const value = String(status || "").trim();
+      if (!value) return "已聯繫";
+      if (["是", "yes", "true", "y"].includes(value.toLowerCase())) return "已轉換";
+      if (["否", "no", "false", "n"].includes(value.toLowerCase())) return "已聯繫";
+      if (value.includes("轉換") || value.includes("成交")) return "已轉換";
+      if (value.includes("未接") || value.includes("無效") || value.includes("失敗")) return "未接通";
+      if (value.includes("已接") || value.includes("預約") || value.includes("聯繫") || value.includes("聯絡")) return "已聯繫";
+      return STATUSES.includes(value) ? value : "已聯繫";
+    }
+
+    function pickStatus(...values) {
+      const status = values.find((value) => {
+        const text = String(value || "").trim();
+        return text.includes("已接") || text.includes("未接") || text.includes("無效") || text.includes("預約") || text.includes("聯繫") || text.includes("轉換");
+      });
+      return normalizeStatus(status || values.find(Boolean) || "已聯繫");
+    }
+
+    function normalizeSource(source) {
+      const value = String(source || "").trim();
+      const lower = value.toLowerCase();
+      if (!value || lower === "n/a") return "其他";
+      if (lower === "fb" || lower.includes("facebook")) return "Facebook 廣告";
+      if (lower === "ig" || lower.includes("instagram")) return "Instagram";
+      if (lower.includes("google")) return "Google 搜尋";
+      if (lower.includes("youtube") || lower === "yt") return "YouTube";
+      if (lower.includes("threads")) return "Threads";
+      if (value.includes("LP") || value.includes("lp")) return "LP 表單";
+      if (value.includes("網路名單")) return "網路名單";
+      if (value.includes("網路表單")) return "網路名單";
+      if (value.includes("官網")) return "官網表單";
+      if (value.includes("免費專線")) return "免費專線";
+      if (value.replace(/\s/g, "").toLowerCase().includes("super8")) return "Super8";
+      if (value.includes("電話") || value.includes("來電")) return "電話來電";
+      if (value.includes("直接進診所") || value.includes("現場")) return "現場諮詢";
+      if (value.includes("親友")) return "親友介紹";
+      if (value.includes("醫師")) return "醫師介紹";
+      if (value.includes("不清楚")) return "不清楚來源";
+      if (appSettings.sourceGroups[value]) return value;
+      if (SOURCE_TAGS.includes(value)) return value;
+      return "其他";
+    }
+
+    function normalizeTherapy(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "其他 / 待分類";
+      const compact = raw.replace(/\s+/g, "").toLowerCase();
+      const tags = [];
+      appSettings.therapyRules.forEach((rule) => {
+        if (rule.keywords.some((keyword) => compact.includes(String(keyword).replace(/\s+/g, "").toLowerCase()))) {
+          tags.push(rule.tag);
+        }
+      });
+      return tags.length ? [...new Set(tags)].join("、") : "其他 / 待分類";
+    }
+
+    function detectLeadStatus(row) {
+      const convertedValue = String(row["已轉換正式"] ?? findField(row, "status") ?? row.status ?? "").trim();
+      if (["是", "yes", "true", "y"].includes(convertedValue.toLowerCase()) || convertedValue.includes("轉換")) return "已轉換";
+      const contactCount = Number(String(row["聯繫紀錄筆數"] ?? row.contactCount ?? "").trim());
+      const lastContact = String(row["最後聯繫日"] ?? row.lastContact ?? "").trim();
+      const rawStatus = normalizeStatus(convertedValue);
+      if (convertedValue && convertedValue !== "否") return rawStatus;
+      if (!Number.isNaN(contactCount)) return contactCount > 0 ? "已聯繫" : "未接通";
+      return lastContact ? "已聯繫" : rawStatus;
+    }
+
+    function normalizeDate(value) {
+      if (!value) return today();
+      if (typeof value === "number" && window.XLSX) {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+      }
+      const date = new Date(value);
+      if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+      const text = String(value).trim();
+      const monthDay = text.match(/(\d{1,2})\s*[月/]\s*(\d{1,2})?/);
+      if (monthDay) {
+        const month = String(monthDay[1]).padStart(2, "0");
+        const day = String(monthDay[2] || 1).padStart(2, "0");
+        return `${new Date().getFullYear()}-${month}-${day}`;
+      }
+      return today();
+    }
+
+    function normalizeSummaryDate(value, yearHint) {
+      if (!value) return today();
+      if (typeof value === "number" && window.XLSX) {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+      }
+      const text = String(value).trim();
+      const y = String(yearHint || new Date().getFullYear()).match(/\d{4}/)?.[0] || String(new Date().getFullYear());
+      const slash = text.match(/(\d{1,2})\/(\d{1,2})/);
+      if (slash) return `${y}-${String(slash[1]).padStart(2, "0")}-${String(slash[2]).padStart(2, "0")}`;
+      const zh = text.match(/(\d{1,2})月\s*(\d{1,2})?/);
+      if (zh) return `${y}-${String(zh[1]).padStart(2, "0")}-${String(zh[2] || 1).padStart(2, "0")}`;
+      return normalizeDate(text);
+    }
+
+    function findField(row, field) {
+      const aliases = FIELD_ALIASES[field];
+      const keys = Object.keys(row);
+      const match = keys.find((key) => aliases.some((alias) => key.trim().toLowerCase() === alias.toLowerCase()));
+      return match ? row[match] : "";
+    }
+
+    function normalizeLead(row) {
+      const therapyText = [
+        findField(row, "campaign"), row.campaign,
+        findField(row, "conversion"), row.conversion
+      ].filter(Boolean).join(" ");
+      return {
+        id: row.id || uid(),
+        createdAt: normalizeDate(findField(row, "createdAt") || row.createdAt),
+        branch: String(findField(row, "branch") || row.branch || "未分院").trim() || "未分院",
+        name: String(findField(row, "name") || row.name || "").trim(),
+        phone: String(findField(row, "phone") || row.phone || "").trim(),
+        source: normalizeSource(findField(row, "source") || row.source || "未分類"),
+        campaign: normalizeTherapy(therapyText),
+        status: detectLeadStatus(row),
+        conversion: normalizeTherapy(therapyText),
+        note: String(findField(row, "note") || row.note || "").trim()
+      };
+    }
+
+    function addLeads(rows) {
+      const existing = new Map(leads.map((lead) => [duplicateKey(lead), lead]));
+      let added = 0, updated = 0, skipped = 0;
+      rows.map(normalizeLead).forEach((lead) => {
+        if (!lead.name && !lead.phone) return;
+        const key = duplicateKey(lead);
+        if (existing.has(key)) {
+          const changed = mergeLead(existing.get(key), lead);
+          if (changed) updated += 1; else skipped += 1;
+          return;
+        }
+        existing.set(key, lead);
+        leads.push(lead);
+        added += 1;
+      });
+      duplicateCount += skipped;
+      saveLeads();
+      render();
+      return { added, updated, skipped };
+    }
+
+    function mergeLead(target, incoming) {
+      let changed = false;
+      const updateField = (field, shouldReplace = (next, current) => next && next !== current) => {
+        const next = incoming[field];
+        const current = target[field];
+        if (shouldReplace(next, current)) { target[field] = next; changed = true; }
+      };
+      const statusRank = { "未接通": 1, "已聯繫": 2, "已轉換": 3 };
+      updateField("status", (next, current) => (statusRank[next] || 0) > (statusRank[current] || 0));
+      updateField("source", (next, current) => next && next !== "其他" && next !== current);
+      updateField("branch", (next, current) => next && next !== "未分院" && next !== current);
+      updateField("campaign", (next, current) => next && next !== "其他 / 待分類" && next !== current);
+      updateField("conversion", (next, current) => next && next !== "其他 / 待分類" && next !== current);
+      updateField("createdAt", (next, current) => next && (!current || next > current));
+      if (incoming.note && !String(target.note || "").includes(incoming.note)) {
+        target.note = [target.note, incoming.note].filter(Boolean).join(" / ");
+        changed = true;
+      }
+      return changed;
+    }
+
+    function summaryKey(summary) {
+      return [summary.date, summary.branch, summary.source, summary.category, summary.count, summary.note].join("|").toLowerCase();
+    }
+
+    function addSummaries(rows) {
+      const existing = new Set(summaries.map(summaryKey));
+      let added = 0, skipped = 0;
+      rows.forEach((row) => {
+        const summary = normalizeSummary(row);
+        if (!summary.count) return;
+        const key = summaryKey(summary);
+        if (existing.has(key)) { skipped += 1; return; }
+        existing.add(key);
+        summaries.push(summary);
+        added += 1;
+      });
+      saveSummaries();
+      render();
+      return { added, skipped };
+    }
+
+    function normalizeSummary(row) {
+      const rawCategory = String(row.category || row.分類 || row.療程 || "").trim();
+      return {
+        id: row.id || uid(),
+        date: normalizeSummaryDate(row.date || row.日期, row.year),
+        branch: String(row.branch || row.院區 || "未分院").trim() || "未分院",
+        source: normalizeSource(row.source || row.來源渠道 || row.來源 || "未分類"),
+        count: Number(row.count ?? row.數量 ?? 0) || 0,
+        category: rawCategory && rawCategory !== "網路新客" ? normalizeTherapy(rawCategory) : (rawCategory || "網路新客"),
+        note: String(row.note || row.備註 || "").trim()
+      };
+    }
+
+    function normalizeStoredData() {
+      const normalized = leads.map((lead) => normalizeLead({
+        ...lead,
+        campaign: [lead.campaign, lead.conversion].filter(Boolean).join(" "),
+        conversion: [lead.conversion, lead.campaign].filter(Boolean).join(" ")
+      }));
+      const byIdentity = new Map();
+      let removed = 0;
+      normalized.forEach((lead) => {
+        const key = duplicateKey(lead);
+        if (byIdentity.has(key)) { mergeLead(byIdentity.get(key), lead); removed += 1; }
+        else { byIdentity.set(key, lead); }
+      });
+      leads = [...byIdentity.values()];
+      duplicateCount += removed;
+      summaries = summaries.map((summary) => normalizeSummary(summary));
+      saveLeads();
+      saveSummaries();
+    }
+
+    function countBy(items, field) {
+      return items.reduce((acc, item) => {
+        const key = item[field] || "未分類";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    function buildSummariesFromLeads() {
+      const groups = {};
+      leads.forEach((lead) => {
+        const key = [lead.createdAt, lead.branch || "未分院", lead.source || "未分類", lead.campaign || lead.conversion || "網路新客"].join("|");
+        if (!groups[key]) {
+          groups[key] = { id: `derived-${key}`, date: lead.createdAt, branch: lead.branch || "未分院", source: lead.source || "未分類", count: 0, category: lead.campaign || lead.conversion || "網路新客", note: "由名單明細自動彙整" };
+        }
+        groups[key].count += 1;
+      });
+      return Object.values(groups);
+    }
+
+    function getReportingSummaries() {
+      const derived = buildSummariesFromLeads();
+      return derived.length ? derived : summaries;
+    }
+
+    function getFilteredLeads() {
+      const keyword = $("searchInput").value.trim().toLowerCase();
+      const source = $("sourceFilter").value;
+      const status = $("statusFilter").value;
+      const from = $("dateFrom").value;
+      const to = $("dateTo").value;
+      return leads.filter((lead) => {
+        const haystack = [lead.branch, lead.name, lead.phone, lead.source, lead.campaign, lead.status, lead.conversion, lead.note].join(" ").toLowerCase();
+        return (!keyword || haystack.includes(keyword))
+          && (!source || lead.source === source)
+          && (!status || lead.status === status)
+          && (!from || lead.createdAt >= from)
+          && (!to || lead.createdAt <= to);
+      });
+    }
+
+    function renderStats(filtered) {
+      const total = leads.length;
+      const converted = leads.filter((lead) => lead.status === "已轉換").length;
+      const reportingSummaries = getReportingSummaries();
+      const publicTotal = reportingSummaries.reduce((sum, item) => sum + item.count, 0);
+      const publicSources = new Set(reportingSummaries.map((item) => item.source).filter(Boolean));
+      const publicBranches = new Set(reportingSummaries.map((item) => item.branch).filter(Boolean));
+      $("totalLeads").textContent = total;
+      $("convertedLeads").textContent = converted;
+      $("conversionRate").textContent = total ? `${Math.round((converted / total) * 100)}%` : "0%";
+      $("publicTotal").textContent = publicTotal;
+      $("publicSourceKinds").textContent = publicSources.size;
+      $("publicBranchKinds").textContent = publicBranches.size;
+      $("duplicateCount").textContent = duplicateCount;
+      $("visibleCount").textContent = `${filtered.length} 筆`;
+    }
+
+    function labelColor(label) {
+      const group = appSettings.sourceGroups[label];
+      if (group && COLOR_PRESETS[group]) return COLOR_PRESETS[group];
+      return SOURCE_COLORS[label] || STATUS_COLORS[label] || { bg: "#eef2f7", fg: "#334155" };
+    }
+
+    function chip(label) {
+      const color = labelColor(label);
+      return `<span class="source-chip" style="--chip-bg:${color.bg};--chip-fg:${color.fg};--chip-line:${color.line || "rgba(51, 65, 85, .08)"}" title="${escapeHtml(label)}">${escapeHtml(label)}</span>`;
+    }
+
+    function barColor(label) { return labelColor(label).bg; }
+
+    function renderChart(id, counts) {
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      const max = Math.max(1, ...entries.map((entry) => entry[1]));
+      $(id).innerHTML = entries.length ? entries.map(([label, value]) => `
+        <div class="bar-row">
+          ${chip(label)}
+          <span class="bar"><i style="width:${Math.max(6, (value / max) * 100)}%; background:${barColor(label)}"></i></span>
+          <strong>${value}</strong>
+        </div>
+      `).join("") : `<p class="hint">尚無資料</p>`;
+    }
+
+    function monthKey(date) { return String(date || "").slice(0, 7) || "未分月"; }
+
+    function formatMonthLabel(key) {
+      if (!key || key === "未分月") return "未分月";
+      const [year, month] = key.split("-");
+      return `${year} 年 ${Number(month)} 月`;
+    }
+
+    function getMonthOptions() {
+      return [...new Set(getReportingSummaries().map((summary) => monthKey(summary.date)).filter(Boolean))]
+        .sort((a, b) => b.localeCompare(a));
+    }
+
+    function syncMonthSelect() {
+      const select = $("monthReportSelect");
+      const current = select.value;
+      const months = getMonthOptions();
+      const thisMonth = today().slice(0, 7);
+      const latestPastMonth = months.find((month) => month <= thisMonth);
+      const defaultMonth = months.includes(thisMonth) ? thisMonth : (latestPastMonth || months[0] || "");
+      select.innerHTML = months.length
+        ? months.map((month) => `<option value="${escapeHtml(month)}">${escapeHtml(formatMonthLabel(month))}</option>`).join("")
+        : `<option value="">尚無月份</option>`;
+      select.value = months.includes(current) ? current : defaultMonth;
+    }
+
+    function sourceStatusStatsFor(month, branch) {
+      const stats = {};
+      if (leads.length) {
+        leads.forEach((lead) => {
+          if (month && monthKey(lead.createdAt) !== month) return;
+          if (branch !== "全分院" && lead.branch !== branch) return;
+          const source = lead.source || "未分類";
+          if (!stats[source]) stats[source] = { total: 0, "已聯繫": 0, "已轉換": 0, "未接通": 0 };
+          stats[source].total += 1;
+          stats[source][normalizeStatus(lead.status)] += 1;
+        });
+        return stats;
+      }
+      getReportingSummaries().forEach((summary) => {
+        if (month && monthKey(summary.date) !== month) return;
+        if (branch !== "全分院" && summary.branch !== branch) return;
+        const source = summary.source || "未分類";
+        if (!stats[source]) stats[source] = { total: 0, "已聯繫": 0, "已轉換": 0, "未接通": 0 };
+        stats[source].total += summary.count;
+        stats[source]["已聯繫"] += summary.count;
+      });
+      return stats;
+    }
+
+    function renderMonthlyCard(title, month, branch) {
+      const stats = sourceStatusStatsFor(month, branch);
+      const entries = Object.entries(stats).sort((a, b) => b[1].total - a[1].total);
+      const total = entries.reduce((sum, entry) => sum + entry[1].total, 0);
+      const max = Math.max(1, ...entries.map((entry) => entry[1].total));
+      return `
+        <div class="monthly-card">
+          <div>
+            <h3>${escapeHtml(title)}</h3>
+            <div class="monthly-total">${escapeHtml(formatMonthLabel(month))}，共 ${total} 筆</div>
+          </div>
+          <div class="bar-list">
+            ${entries.length ? entries.slice(0, 8).map(([label, stat]) => `
+              <div class="bar-row">
+                ${chip(label)}
+                <span class="bar"><i style="width:${Math.max(6, (stat.total / max) * 100)}%; background:${barColor(label)}"></i></span>
+                <strong>${stat.total}</strong>
+              </div>
+            `).join("") : `<p class="hint">本月尚無資料</p>`}
+          </div>
+          <table class="monthly-table">
+            <thead><tr><th>來源</th><th>總數</th><th>已聯繫</th><th>已轉換</th><th>未接通</th><th>轉換率</th></tr></thead>
+            <tbody>
+              ${entries.length ? entries.map(([label, stat]) => `
+                <tr>
+                  <td>${chip(label)}</td>
+                  <td>${stat.total}</td>
+                  <td>${stat["已聯繫"]}</td>
+                  <td>${stat["已轉換"]}</td>
+                  <td>${stat["未接通"]}</td>
+                  <td>${stat.total ? Math.round((stat["已轉換"] / stat.total) * 100) : 0}%</td>
+                </tr>
+              `).join("") : `<tr><td colspan="6">尚無資料</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderMonthlyReport() {
+      syncMonthSelect();
+      const month = $("monthReportSelect").value;
+      $("monthlyReport").innerHTML = month
+        ? [
+          renderMonthlyCard("全分院", month, "全分院"),
+          renderMonthlyCard("台北", month, "台北"),
+          renderMonthlyCard("台中", month, "台中")
+        ].join("")
+        : `<p class="hint">尚無可產生月報的彙整資料。</p>`;
+    }
+
+    function settingsToText() {
+      $("sourceSettingsInput").value = Object.entries(appSettings.sourceGroups)
+        .map(([source, group]) => `${source}=${group}`).join("\n");
+      $("therapySettingsInput").value = appSettings.therapyRules
+        .map((rule) => `${rule.tag}=${rule.keywords.join(",")}`).join("\n");
+      $("branchSettingsInput").value = appSettings.branches.join("\n");
+    }
+
+    function parseSettingsText() {
+      const sourceGroups = {};
+      $("sourceSettingsInput").value.split(/\r?\n/).forEach((line) => {
+        const [source, group] = line.split("=").map((part) => String(part || "").trim());
+        if (source && group) sourceGroups[source] = COLOR_PRESETS[group] ? group : "灰";
+      });
+      const therapyRules = $("therapySettingsInput").value.split(/\r?\n/).map((line) => {
+        const [tag, keywordsText] = line.split("=").map((part) => String(part || "").trim());
+        const keywords = String(keywordsText || "").split(",").map((keyword) => keyword.trim()).filter(Boolean);
+        return tag && keywords.length ? { tag, keywords } : null;
+      }).filter(Boolean);
+      const branches = $("branchSettingsInput").value.split(/\r?\n/).map((branch) => branch.trim()).filter(Boolean);
+      return {
+        sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...sourceGroups },
+        therapyRules: therapyRules.length ? therapyRules : DEFAULT_SETTINGS.therapyRules,
+        branches: branches.length ? branches : DEFAULT_SETTINGS.branches
+      };
+    }
+
+    function applySettingsToExistingLeads() {
+      leads = leads.map((lead) => normalizeLead({
+        ...lead,
+        source: lead.source,
+        campaign: [lead.campaign, lead.conversion, lead.note].filter(Boolean).join(" "),
+        conversion: [lead.conversion, lead.campaign, lead.note].filter(Boolean).join(" ")
+      }));
+      saveLeads();
+      render();
+    }
+
+    function renderFilters() {
+      const sources = [...new Set(leads.map((lead) => lead.source).filter(Boolean))].sort();
+      const statuses = [...new Set([...STATUSES, ...leads.map((lead) => lead.status).filter(Boolean)])];
+      const sourceValue = $("sourceFilter").value;
+      const statusValue = $("statusFilter").value;
+      $("sourceFilter").innerHTML = `<option value="">全部來源</option>${sources.map((source) => `<option>${escapeHtml(source)}</option>`).join("")}`;
+      $("statusFilter").innerHTML = `<option value="">全部狀態</option>${statuses.map((status) => `<option>${escapeHtml(status)}</option>`).join("")}`;
+      $("sourceFilter").value = sourceValue;
+      $("statusFilter").value = statusValue;
+    }
+
+    function renderBranchOptions() {
+      const branchValue = $("branchInput").value;
+      const defaultValue = $("defaultBranch").value;
+      const branchOptions = appSettings.branches.map((branch) => `<option>${escapeHtml(branch)}</option>`).join("");
+      $("branchInput").innerHTML = branchOptions;
+      $("defaultBranch").innerHTML = `<option>自動判斷</option>${branchOptions}`;
+      $("branchInput").value = appSettings.branches.includes(branchValue) ? branchValue : (appSettings.branches[0] || "台北");
+      $("defaultBranch").value = defaultValue === "自動判斷" || appSettings.branches.includes(defaultValue) ? defaultValue : "自動判斷";
+    }
+
+    function renderRows(filtered) {
+      $("emptyState").style.display = leads.length ? "none" : "block";
+      $("leadRows").innerHTML = filtered.map((lead) => `
+        <tr data-id="${lead.id}">
+          <td><input type="date" data-field="createdAt" value="${escapeHtml(lead.createdAt)}"></td>
+          <td><input data-field="branch" value="${escapeHtml(lead.branch || "未分院")}"></td>
+          <td><input data-field="name" value="${escapeHtml(lead.name)}"></td>
+          <td><input data-field="phone" value="${escapeHtml(lead.phone)}"></td>
+          <td><input data-field="source" value="${escapeHtml(lead.source)}"></td>
+          <td><input data-field="campaign" value="${escapeHtml(lead.campaign)}"></td>
+          <td>
+            <select data-field="status">
+              ${[...new Set([...STATUSES, lead.status])].map((status) => `<option ${status === lead.status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+            </select>
+          </td>
+          <td><input data-field="conversion" value="${escapeHtml(lead.conversion)}"></td>
+          <td><input data-field="note" value="${escapeHtml(lead.note)}"></td>
+          <td><button data-delete="${lead.id}" class="danger">刪除</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function render() {
+      renderFilters();
+      const filtered = getFilteredLeads();
+      renderStats(filtered);
+      renderChart("sourceChart", countBy(leads, "source"));
+      renderChart("statusChart", countBy(leads, "status"));
+      renderChart("publicSourceChart", countSummaryBy(getReportingSummaries(), "source"));
+      renderMonthlyReport();
+      renderRows(filtered);
+    }
+
+    function countSummaryBy(items, field) {
+      return items.reduce((acc, item) => {
+        const key = item[field] || "未分類";
+        acc[key] = (acc[key] || 0) + item.count;
+        return acc;
+      }, {});
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+      }[char]));
+    }
+
+    function parseDelimited(text) {
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (!lines.length) return [];
+      const delimiter = lines.some((line) => line.includes("\t")) ? "\t" : ",";
+      const rows = lines.map((line) => line.split(delimiter).map((cell) => cell.trim()));
+      const first = rows[0].map((cell) => cell.toLowerCase());
+      const hasHeader = Object.values(FIELD_ALIASES).flat().some((alias) => first.includes(alias.toLowerCase()));
+      if ($("importMode").value === "summary") return parseSummaryRows(rows, "貼上資料");
+      const headers = hasHeader ? rows.shift() : ["建立日期", "姓名", "電話", "來源渠道", "療程", "療程補充", "狀態", "備註"];
+      return rows.map((cells) => Object.fromEntries(headers.map((header, index) => [header, cells[index] || ""])));
+    }
+
+    async function importFile(file) {
+      if (!window.XLSX) { alert("Excel 解析套件尚未載入，請確認網路可連線，或改用 CSV 貼上匯入。"); return; }
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      if ($("importMode").value === "summary") {
+        const result = addSummaries(parseSummaryRows(rows, file.name));
+        alert(`已新增 ${result.added} 列廣告商彙整，重複略過 ${result.skipped} 列。`);
+      } else {
+        const result = addLeads(parseDetailRows(rows, file.name));
+        alert(`已新增 ${result.added} 筆，更新 ${result.updated} 筆，重複未變更 ${result.skipped} 筆。`);
+      }
+      $("fileInput").value = "";
+    }
+
+    function parseDetailRows(rows, filename) {
+      const branch = detectBranch(filename);
+      const first = (rows[0] || []).map((cell) => String(cell).trim().toLowerCase());
+      const hasHeader = Object.values(FIELD_ALIASES).flat().some((alias) => first.includes(alias.toLowerCase()));
+      if (hasHeader) {
+        const headers = rows[0];
+        return rows.slice(1).map((cells) => {
+          const row = Object.fromEntries(headers.map((header, index) => [header, cells[index] || ""]));
+          row.branch = findField(row, "branch") || branch;
+          return row;
+        });
+      }
+      return rows.map((cells) => ({
+        createdAt: cells[0] || today(), branch,
+        name: cells[1] || "", phone: cells[2] || "",
+        source: cells[3] || "未分類",
+        conversion: cells[4] || cells[5] || "",
+        campaign: cells[5] || "",
+        status: pickStatus(cells[6], cells[7]),
+        note: [cells[8], cells[9], cells[10], cells[11], cells[12]].filter(Boolean).join(" / ")
+      }));
+    }
+
+    function parseSummaryRows(rows, filename) {
+      if (!rows.length) return [];
+      const header = rows[1] || rows[0] || [];
+      const hasSourceBreakdown = header.some((cell) => ["FB", "官網表單", "免費專線", "Super8", "Super 8"].includes(String(cell).trim()));
+      const hasPersonalBlocks = header.some((cell) => String(cell).trim() === "姓名") && header.some((cell) => String(cell).trim() === "來源");
+      if (hasPersonalBlocks) return parsePersonalSummaryBlocks(rows, filename);
+      if (hasSourceBreakdown) return parseSourceSummaryBlocks(rows);
+      return parseBranchCountBlocks(rows);
+    }
+
+    function parsePersonalSummaryBlocks(rows, filename) {
+      const header = rows[1] || [];
+      const blocks = header.map((cell, index) => String(cell).trim() === "日期" ? index : -1).filter((index) => index >= 0);
+      const branch = detectBranch(filename);
+      const output = [];
+      blocks.forEach((start) => {
+        const year = rows[0]?.[start];
+        rows.slice(2).forEach((cells) => {
+          const date = cells[start]; const category = cells[start + 1]; const source = cells[start + 3]; const note = cells[start + 4];
+          if (!date || !source) return;
+          output.push({ date, year, branch, source, count: 1, category, note });
+        });
+      });
+      return output;
+    }
+
+    function parseBranchCountBlocks(rows) {
+      const header = rows[1] || rows[0] || [];
+      const blocks = header.map((cell, index) => String(cell).trim() === "日期" ? index : -1).filter((index) => index >= 0);
+      const output = [];
+      blocks.forEach((start) => {
+        const year = rows[0]?.[start];
+        rows.slice(2).forEach((cells) => {
+          const date = cells[start];
+          if (!date) return;
+          [["台北", cells[start + 1]], ["台中", cells[start + 2]]].forEach(([branch, count]) => {
+            const number = Number(count) || 0;
+            if (number > 0) output.push({ date, year, branch, source: "全部來源", count: number, category: "網路新客" });
+          });
+        });
+      });
+      return output;
+    }
+
+    function parseSourceSummaryBlocks(rows) {
+      const header = rows[1] || [];
+      const blocks = header.map((cell, index) => String(cell).trim() === "日期" ? index : -1).filter((index) => index >= 0);
+      const output = [];
+      blocks.forEach((start) => {
+        const year = rows[0]?.[start];
+        rows.slice(2).forEach((cells) => {
+          const date = cells[start];
+          if (!date) return;
+          const branchGroups = [{ branch: "台北", offset: 1 }, { branch: "台中", offset: 7 }];
+          branchGroups.forEach((group) => {
+            for (let i = 0; i < 5; i += 1) {
+              const source = header[start + group.offset + i];
+              const count = Number(cells[start + group.offset + i]) || 0;
+              if (source && count > 0) output.push({ date, year, branch: group.branch, source, count, category: "網路新客" });
+            }
+          });
+        });
+      });
+      return output;
+    }
+
+    function exportExcel(rows, filename) {
+      if (!window.XLSX) {
+        const csv = rowsToCsv(rows);
+        downloadBlob(csv, filename.replace(".xlsx", ".csv"), "text/csv;charset=utf-8");
+        return;
+      }
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "名單");
+      XLSX.writeFile(workbook, filename);
+    }
+
+    function rowsForExport(rows) {
+      return rows.map((lead) => ({
+        建立日期: lead.createdAt, 院區: lead.branch || "未分院",
+        姓名: lead.name, 電話: lead.phone,
+        來源渠道: lead.source, 療程: lead.campaign,
+        狀態: lead.status, 療程補充: lead.conversion, 備註: lead.note
+      }));
+    }
+
+    function rowsForPublicExport() {
+      const groups = {};
+      if (leads.length) {
+        leads.forEach((lead) => {
+          const key = [monthKey(lead.createdAt), lead.branch || "未分院", lead.source || "未分類"].join("|");
+          if (!groups[key]) {
+            groups[key] = { 月份: monthKey(lead.createdAt), 院區: lead.branch || "未分院", 來源渠道: lead.source || "未分類", 總數: 0, 已聯繫: 0, 已轉換: 0, 未接通: 0 };
+          }
+          groups[key].總數 += 1;
+          groups[key][normalizeStatus(lead.status)] += 1;
+        });
+      } else {
+        getReportingSummaries().forEach((summary) => {
+          const key = [monthKey(summary.date), summary.branch || "未分院", summary.source || "未分類"].join("|");
+          if (!groups[key]) {
+            groups[key] = { 月份: monthKey(summary.date), 院區: summary.branch || "未分院", 來源渠道: summary.source || "未分類", 總數: 0, 已聯繫: 0, 已轉換: 0, 未接通: 0 };
+          }
+          groups[key].總數 += summary.count;
+          groups[key].已聯繫 += summary.count;
+        });
+      }
+      return Object.values(groups)
+        .sort((a, b) => b.月份.localeCompare(a.月份) || a.院區.localeCompare(b.院區) || b.總數 - a.總數)
+        .map((row) => ({ ...row, 轉換率: row.總數 ? `${Math.round((row.已轉換 / row.總數) * 100)}%` : "0%" }));
+    }
+
+    function rowsToCsv(rows) {
+      const headers = Object.keys(rows[0] || { 建立日期: "", 院區: "", 姓名: "", 電話: "", 來源渠道: "", 療程: "", 狀態: "", 療程補充: "", 備註: "" });
+      const body = rows.map((row) => headers.map((header) => `"${String(row[header] ?? "").replace(/"/g, '""')}"`).join(","));
+      return "﻿" + [headers.join(","), ...body].join("\n");
+    }
+
+    function downloadBlob(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url; link.download = filename; link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildSummaryPrompt() {
+      const total = leads.length;
+      const converted = leads.filter((lead) => lead.status === "已轉換").length;
+      const bySource = Object.entries(countBy(leads, "source")).sort((a, b) => b[1] - a[1]);
+      const byStatus = Object.entries(countBy(leads, "status")).sort((a, b) => b[1] - a[1]);
+      const reportingSummaries = getReportingSummaries();
+      const publicBySource = Object.entries(countSummaryBy(reportingSummaries, "source")).sort((a, b) => b[1] - a[1]);
+      const publicByBranch = Object.entries(countSummaryBy(reportingSummaries, "branch")).sort((a, b) => b[1] - a[1]);
+      return `請你以正欣診所行銷主管簡報口吻，整理以下名單成效。注意：廣告商報表只能使用去個資彙整數，不可輸出姓名、電話或個人備註。請輸出：1. 三句重點摘要 2. 來源渠道表現 3. 台北/台中院區觀察 4. 下週建議行動。\n\n內部總名單：${total}\n已轉換：${converted}\n轉換率：${total ? Math.round((converted / total) * 100) : 0}%\n\n內部來源渠道：\n${bySource.map(([k, v]) => `- ${k}: ${v}`).join("\n") || "- 無"}\n\n內部狀態分布：\n${byStatus.map(([k, v]) => `- ${k}: ${v}`).join("\n") || "- 無"}\n\n廣告商彙整來源：\n${publicBySource.map(([k, v]) => `- ${k}: ${v}`).join("\n") || "- 無"}\n\n廣告商彙整院區：\n${publicByBranch.map(([k, v]) => `- ${k}: ${v}`).join("\n") || "- 無"}`;
+    }
+
+    function applyViewMode(mode) {
+      const isAgency = mode === "agency";
+      const isAgencyShare = new URLSearchParams(location.search).get("view") === "agency";
+      document.body.classList.toggle("agency-mode", isAgency);
+      document.body.classList.toggle("agency-share-mode", isAgencyShare);
+      $("modeBadge").textContent = isAgency ? "廣告商檢視" : "內部後台";
+      $("brandSubtitle").textContent = isAgency ? "來源渠道、院區與日期彙整" : "名單匯入、渠道追蹤、轉換彙整、主管檢視與 Excel 匯出";
+      $("viewAgencyBtn").classList.toggle("active", isAgency);
+      $("viewInternalBtn").classList.toggle("active", !isAgency);
+      if (!isAgencyShare) localStorage.setItem(VIEW_STORAGE_KEY, mode);
+    }
+
+    function agencyUrl() {
+      const url = new URL(location.href);
+      url.searchParams.set("view", "agency");
+      return url.href;
+    }
+
+    // ── 載入/登入 UI ─────────────────────────────────────────────
+    function showLoading(on) {
+      $("loadingOverlay").style.display = on ? "flex" : "none";
+    }
+
+    function showLoginOverlay(on = true) {
+      $("loginOverlay").style.display = on ? "flex" : "none";
+    }
+
+    async function handleGoogleLogin() {
+      const errEl = $("loginError");
+      errEl.textContent = "";
+      $("loginGoogleBtn").disabled = true;
+      $("loginGoogleBtn").textContent = "跳轉中…";
+
+      const { error } = await db.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+
+      if (error) {
+        errEl.textContent = "Google 登入失敗，請確認已完成 Supabase Google 設定。";
+        $("loginGoogleBtn").disabled = false;
+        $("loginGoogleBtn").innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.6 33 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.5 15.1 18.9 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.5 26.7 36 24 36c-5.3 0-9.7-3-11.3-7.4l-6.6 5.1C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.4 4.3-4.4 5.6l6.2 5.2C36.9 37 44 32 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg> 用 Google 帳號登入`;
+      }
+      // 若無錯誤，瀏覽器會自動跳轉到 Google，回來後 init() 會接手
+    }
+
+    async function handleLogout() {
+      await db.auth.signOut();
+      leads = []; summaries = []; duplicateCount = 0;
+      render();
+      showLoginOverlay(true);
+    }
+
+    // ── 初始化 ───────────────────────────────────────────────────
+    async function loadAllData() {
+      showLoading(true);
+      try {
+        [leads, summaries, appSettings] = await Promise.all([
+          loadLeads(), loadSummaries(), loadSettings()
+        ]);
+        duplicateCount = 0;
+        normalizeStoredData();
+        renderBranchOptions();
+        render();
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function init() {
+      const params = new URLSearchParams(location.search);
+      const isAgencyUrl = params.get("view") === "agency";
+
+      if (isAgencyUrl) {
+        // 廣告商連結：只讀取公開彙整資料（不含個資，不需登入）
+        showLoading(true);
+        try {
+          const [publicData, settingsData] = await Promise.all([
+            kvGet('public_data'),
+            kvGet('settings')
+          ]);
+          const saved = settingsData || {};
+          appSettings = {
+            sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...(saved.sourceGroups || {}) },
+            therapyRules: Array.isArray(saved.therapyRules) && saved.therapyRules.length
+              ? saved.therapyRules : DEFAULT_SETTINGS.therapyRules,
+            branches: Array.isArray(saved.branches) && saved.branches.length
+              ? saved.branches : DEFAULT_SETTINGS.branches
+          };
+          summaries = publicData?.reportingSummaries || [];
+          leads = []; // 廣告商模式不載入個資
+          renderBranchOptions();
+          applyViewMode("agency");
+          render();
+        } finally {
+          showLoading(false);
+        }
+        return;
+      }
+
+      // 內部模式：需要登入
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        await loadAllData();
+        applyViewMode(localStorage.getItem(VIEW_STORAGE_KEY) || "internal");
+      } else {
+        showLoginOverlay(true);
+      }
+    }
+
+    // ── 事件監聽 ─────────────────────────────────────────────────
+    $("loginGoogleBtn").addEventListener("click", handleGoogleLogin);
+
+    $("logoutBtn").addEventListener("click", handleLogout);
+
+    $("singleAddBtn").addEventListener("click", () => {
+      const result = addLeads([{
+        branch: $("branchInput").value,
+        createdAt: $("createdAtInput").value || today(),
+        name: $("nameInput").value,
+        phone: $("phoneInput").value,
+        source: normalizeSource($("sourceInput").value),
+        campaign: normalizeTherapy($("campaignInput").value),
+        status: $("statusInput").value,
+        conversion: normalizeTherapy($("conversionInput").value || $("campaignInput").value),
+        note: $("noteInput").value
+      }]);
+      if (!result.added && result.updated) alert("這筆資料已存在，已更新原本名單。");
+      if (!result.added && !result.updated && result.skipped) alert("這筆資料看起來已存在，內容沒有變更。");
+      ["nameInput", "phoneInput", "sourceInput", "campaignInput", "conversionInput", "noteInput"].forEach((id) => $(id).value = "");
+    });
+
+    $("addBlankBtn").addEventListener("click", () => {
+      leads.unshift(normalizeLead({ 院區: "未分院", 姓名: "", 電話: "", 來源渠道: "未分類", 狀態: "已聯繫", 建立日期: today() }));
+      saveLeads();
+      render();
+    });
+
+    $("pasteImportBtn").addEventListener("click", () => {
+      const rows = parseDelimited($("pasteBox").value);
+      const result = $("importMode").value === "summary" ? addSummaries(rows) : addLeads(rows);
+      alert($("importMode").value === "summary"
+        ? `已新增 ${result.added} 列廣告商彙整，重複略過 ${result.skipped} 列。`
+        : `已新增 ${result.added} 筆，更新 ${result.updated} 筆，重複未變更 ${result.skipped} 筆。`);
+      $("pasteBox").value = "";
+    });
+
+    $("fileInput").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) importFile(file);
+    });
+
+    $("exportBtn").addEventListener("click", () => {
+      exportExcel(rowsForExport(getFilteredLeads()), `正欣診所名單匯出_${today()}.xlsx`);
+    });
+
+    $("exportPublicBtn").addEventListener("click", () => {
+      exportExcel(rowsForPublicExport(), `正欣診所廣告商彙整報表_${today()}.xlsx`);
+    });
+
+    $("downloadTemplateBtn").addEventListener("click", () => {
+      if ($("importMode").value === "summary") {
+        exportExcel([{ 日期: today(), 院區: "台北", 來源渠道: "Facebook 廣告", 數量: 12, 療程分類: "網路新客", 備註: "範例資料，可刪除" }], "正欣診所廣告商彙整範本.xlsx");
+      } else {
+        exportExcel([{ 建立日期: today(), 院區: "台北", 姓名: "王小欣", 電話: "0912345678", 來源渠道: "Facebook 廣告", 療程: "血液淨化 / DFPP", 狀態: "新名單", 療程補充: "", 備註: "範例資料，可刪除" }], "正欣診所名單匯入範本.xlsx");
+      }
+    });
+
+    $("viewAgencyBtn").addEventListener("click", () => {
+      applyViewMode("agency");
+      history.replaceState(null, "", agencyUrl());
+    });
+
+    $("viewInternalBtn").addEventListener("click", () => {
+      const url = new URL(location.href);
+      url.searchParams.delete("view");
+      history.replaceState(null, "", url.href);
+      applyViewMode("internal");
+    });
+
+    $("copyAgencyLinkBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(agencyUrl());
+      alert("已複製廣告商檢視連結。廣告商用此連結，不需登入，也看不到個資。");
+    });
+
+    $("clearBtn").addEventListener("click", () => {
+      if (confirm("確定要清空所有名單資料？建議先匯出備份。")) {
+        leads = []; summaries = []; duplicateCount = 0;
+        saveLeads(); saveSummaries(); render();
+      }
+    });
+
+    $("leadRows").addEventListener("input", (event) => {
+      const field = event.target.dataset.field;
+      if (!field) return;
+      const row = event.target.closest("tr");
+      const lead = leads.find((item) => item.id === row.dataset.id);
+      if (!lead) return;
+      lead[field] = event.target.value;
+      saveLeads();
+      render();
+    });
+
+    $("leadRows").addEventListener("click", (event) => {
+      const id = event.target.dataset.delete;
+      if (!id) return;
+      leads = leads.filter((lead) => lead.id !== id);
+      saveLeads();
+      render();
+    });
+
+    ["searchInput", "sourceFilter", "statusFilter", "dateFrom", "dateTo"].forEach((id) => {
+      $(id).addEventListener("input", render);
+    });
+
+    $("monthReportSelect").addEventListener("input", renderMonthlyReport);
+
+    $("summaryBtn").addEventListener("click", () => {
+      $("summaryText").value = buildSummaryPrompt();
+      $("summaryModal").showModal();
+    });
+
+    $("closeSummaryBtn").addEventListener("click", () => $("summaryModal").close());
+    $("copySummaryBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText($("summaryText").value);
+      alert("已複製，可貼到 Claude。");
+    });
+
+    $("settingsBtn").addEventListener("click", () => {
+      settingsToText();
+      $("settingsModal").showModal();
+    });
+
+    $("closeSettingsBtn").addEventListener("click", () => $("settingsModal").close());
+
+    $("saveSettingsBtn").addEventListener("click", () => {
+      appSettings = parseSettingsText();
+      saveSettings();
+      renderBranchOptions();
+      render();
+      alert("設定已儲存至雲端。所有設備同步。");
+    });
+
+    $("applySettingsBtn").addEventListener("click", () => {
+      appSettings = parseSettingsText();
+      saveSettings();
+      applySettingsToExistingLeads();
+      renderBranchOptions();
+      alert("已套用設定到既有名單。");
+    });
+
+    $("exportSettingsBtn").addEventListener("click", () => {
+      downloadBlob(JSON.stringify(appSettings, null, 2), `正欣診所後台設定_${today()}.json`, "application/json;charset=utf-8");
+    });
+
+    $("importSettingsBtn").addEventListener("click", () => $("settingsFileInput").click());
+
+    $("settingsFileInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        appSettings = {
+          sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...(imported.sourceGroups || {}) },
+          therapyRules: Array.isArray(imported.therapyRules) && imported.therapyRules.length ? imported.therapyRules : DEFAULT_SETTINGS.therapyRules,
+          branches: Array.isArray(imported.branches) && imported.branches.length ? imported.branches : DEFAULT_SETTINGS.branches
+        };
+        saveSettings();
+        settingsToText();
+        renderBranchOptions();
+        render();
+        alert("設定已匯入並儲存至雲端。");
+      } catch {
+        alert("設定檔格式無法讀取，請確認是 JSON 檔。");
+      }
+      $("settingsFileInput").value = "";
+    });
+
+    $("resetSettingsBtn").addEventListener("click", () => {
+      if (!confirm("確定要還原預設後台設定？")) return;
+      appSettings = structuredClone(DEFAULT_SETTINGS);
+      saveSettings();
+      settingsToText();
+      renderBranchOptions();
+      render();
+    });
+
+    // 監聽其他分頁/視窗的登入狀態變更
+    db.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        const params = new URLSearchParams(location.search);
+        if (params.get("view") !== "agency") {
+          leads = []; summaries = []; duplicateCount = 0;
+          render();
+          showLoginOverlay(true);
+        }
+      }
+    });
+
+    // 啟動
+    $("createdAtInput").value = today();
+    init();
+  </script>
+</body>
+</html>
