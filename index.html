@@ -15,9 +15,9 @@
       --line: #dfe4ea;
       --brand: #0f766e;
       --brand-dark: #0b5f59;
-      --accent: #b45309;
+      --accent: #52606c;
       --danger: #b91c1c;
-      --ok: #15803d;
+      --ok: #3f3f46;
       --soft: #edf7f5;
       --shadow: 0 12px 32px rgba(24, 32, 42, .08);
     }
@@ -37,29 +37,41 @@
     }
 
     button {
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink);
-      border-radius: 6px;
-      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      background: #f3f4f6;
+      color: #374151;
+      border-radius: 8px;
+      padding: 8px 14px;
       cursor: pointer;
-      min-height: 38px;
+      min-height: 36px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .12s, border-color .12s;
     }
 
-    button:hover { border-color: var(--brand); }
+    button:hover { background: #e5e7eb; border-color: #d1d5db; }
 
     button.primary {
-      background: var(--brand);
+      background: #1f2937;
       color: #fff;
-      border-color: var(--brand);
+      border-color: #111827;
     }
 
-    button.primary:hover { background: var(--brand-dark); }
+    button.primary:hover { background: #374151; border-color: #374151; }
+
+    button.active {
+      background: #1f2937;
+      color: #fff;
+      border-color: #1f2937;
+    }
 
     button.danger {
-      color: var(--danger);
-      border-color: #f1c7c7;
+      background: #fff;
+      color: #dc2626;
+      border-color: #fecaca;
     }
+
+    button.danger:hover { background: #fef2f2; }
 
     input, select, textarea {
       width: 100%;
@@ -247,9 +259,9 @@
     }
 
     .notice {
-      border-left: 3px solid var(--brand);
-      background: var(--soft);
-      color: #31524e;
+      border-left: 3px solid #9ca3af;
+      background: #f3f4f6;
+      color: #4b5563;
       padding: 10px 12px;
       border-radius: 6px;
       font-size: 13px;
@@ -405,7 +417,7 @@
       white-space: nowrap;
     }
 
-    .badge.ok { background: #dcfce7; color: var(--ok); }
+    .badge.ok { background: #f4f4f5; color: var(--ok); }
     .badge.warn { background: #ffedd5; color: var(--accent); }
     .badge.danger { background: #fee2e2; color: var(--danger); }
 
@@ -543,6 +555,72 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* 每日新增熱力表 */
+    .daily-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .daily-table { border-collapse: collapse; font-size: 12px; white-space: nowrap; width: 100%; }
+    .daily-table th { padding: 4px 4px 8px; text-align: center; color: var(--muted); font-size: 11px; font-weight: 500; }
+    .daily-table td { padding: 4px 5px; text-align: center; min-width: 34px; }
+    .daily-table .col-label { padding: 4px 8px; text-align: left; white-space: nowrap; position: sticky; left: 0; z-index: 1; font-size: 12px; }
+    /* 台北色系（灰） */
+    .branch-tp-src  td { background: #f8fafc; }
+    .branch-tp-src  .col-label { background: #f8fafc; color: #475569; }
+    .branch-tp-src  .num-cell { color: #475569; }
+    .branch-tp-sub  td { background: #e2e8f0; }
+    .branch-tp-sub  .col-label { background: #e2e8f0; color: #1e293b; font-weight: 700; }
+    .branch-tp-sub  .num-cell { color: #1e293b; font-weight: 700; }
+    /* 台中色系（橘） */
+    .branch-tc-src  td { background: #fff7ed; }
+    .branch-tc-src  .col-label { background: #fff7ed; color: #9a3412; }
+    .branch-tc-src  .num-cell { color: #9a3412; }
+    .branch-tc-sub  td { background: #fed7aa; }
+    .branch-tc-sub  .col-label { background: #fed7aa; color: #7c2d12; font-weight: 700; }
+    .branch-tc-sub  .num-cell { color: #7c2d12; font-weight: 700; }
+    /* 其他院區色系（紫） */
+    .branch-ot-src  td { background: #faf5ff; }
+    .branch-ot-src  .col-label { background: #faf5ff; color: #6b21a8; }
+    .branch-ot-src  .num-cell { color: #6b21a8; }
+    .branch-ot-sub  td { background: #e9d5ff; }
+    .branch-ot-sub  .col-label { background: #e9d5ff; color: #581c87; font-weight: 700; }
+    .branch-ot-sub  .num-cell { color: #581c87; font-weight: 700; }
+    /* 總計列 */
+    .daily-total-row td { background: #6b7280; color: #fff; font-weight: 700; border-top: 2px solid #d1d5db; }
+    .daily-total-row .col-label { background: #6b7280; color: #fff; font-weight: 700; }
+    /* 無資料 */
+    .dc0 { color: #d1d5db; font-size: 10px; }
+
+    /* ── 匯出下拉選單 ─────────────────────────────────────── */
+    .export-menu {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 200;
+      background: #fff; border: 1px solid var(--line); border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 6px;
+      min-width: 160px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .export-menu button {
+      text-align: left; border: none; border-radius: 6px; padding: 8px 12px;
+      font-size: 13px; white-space: nowrap; width: 100%;
+    }
+    .export-menu button:hover { background: var(--soft); border-color: transparent; }
+
+    /* ── 每日甜甜圈 + 比較 ────────────────────────────────── */
+    .daily-summary-row { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 16px; }
+    .donut-wrap { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+    .donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .compare-panel { flex: 1; min-width: 200px; }
+    .compare-title { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+    .compare-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+    .compare-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+    .compare-bar-wrap { flex: 1; display: flex; gap: 4px; }
+    .compare-bar { height: 20px; border-radius: 4px; min-width: 2px; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; font-size: 11px; font-weight: 600; transition: width .3s; }
+
+    /* ── 來源 chip（daily chart 內）──────────────────────── */
+    .src-chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
+
+    /* ── 每日表格院區分隔 ─────────────────────────────────── */
+    .branch-header-row td { background: #f8fafc; border-top: 2px solid var(--line); border-bottom: 1px solid var(--line); padding: 6px 8px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .branch-spacer { height: 8px; }
+
     @media (max-width: 1100px) {
       .grid { grid-template-columns: 1fr; }
       .charts { grid-template-columns: 1fr; }
@@ -570,14 +648,19 @@
         </div>
         <div class="actions">
           <button id="viewAgencyBtn">廣告商檢視</button>
-          <button id="viewInternalBtn">內部後台</button>
+          <button id="viewInternalBtn" style="display:none">內部後台</button>
           <button id="settingsBtn" data-internal-only>後台設定</button>
-          <button id="copyAgencyLinkBtn" data-internal-only>複製廣告商連結</button>
-          <button id="addBlankBtn" data-internal-only>新增空白列</button>
-          <button id="summaryBtn" data-internal-only>產生 Claude 摘要</button>
-          <button id="exportPublicBtn" data-internal-only>下載彙整資料</button>
-          <button id="exportBtn" class="primary" data-internal-only>匯出內部名單</button>
-          <button id="clearBtn" class="danger" data-internal-only>清空資料</button>
+          <div class="export-wrap" data-internal-only style="position:relative">
+            <button id="exportDropBtn" class="primary">匯出 ▾</button>
+            <div id="exportMenu" class="export-menu" style="display:none">
+              <button id="exportPublicBtn">下載彙整資料</button>
+              <button id="exportBtn">匯出內部名單</button>
+              <button id="summaryBtn">產生 Claude 摘要</button>
+              <button id="copyAgencyLinkBtn">複製廣告商連結</button>
+              <button id="addBlankBtn">新增空白列</button>
+            </div>
+          </div>
+          <button id="clearBtn" data-internal-only style="display:none">清空資料</button>
         </div>
       </div>
     </header>
@@ -624,11 +707,14 @@
                     </select>
                   </label>
                 </div>
-                <label>
-                  <span>上傳檔案</span>
-                  <input id="fileInput" type="file" accept=".xlsx,.xls,.csv">
-                </label>
-                <p class="hint">建議以總名單明細為主資料；月報、來源總表與廣告商檢視都會從名單明細自動產生。</p>
+                <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;">
+                  <label style="flex:1;min-width:0">
+                    <span>上傳檔案</span>
+                    <input id="fileInput" type="file" accept=".xlsx,.xls,.csv" style="width:100%">
+                  </label>
+                  <button id="importFileBtn" class="primary" style="white-space:nowrap;margin-bottom:1px" disabled>匯入檔案</button>
+                </div>
+                <p class="hint">選擇檔案後點「匯入檔案」送出。建議以總名單明細為主資料；月報、來源總表與廣告商檢視都會從名單明細自動產生。</p>
               </div>
               <div class="notice">廣告商檢視只會看到名單明細自動彙整後的數據，不會顯示姓名與電話。</div>
               <label>
@@ -698,6 +784,26 @@
             <div class="panel">
               <div class="panel-head"><h2>來源總覽</h2></div>
               <div class="panel-body"><div id="publicSourceChart" class="bar-list"></div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h2>每日新增人數</h2>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <input type="month" id="dailyMonthPicker" style="border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer;">
+                <span style="font-size:12px;color:var(--muted)">對比</span>
+                <input type="month" id="dailyComparePicker" style="border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer;">
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="daily-summary-row">
+                <div id="branchDonut" class="donut-wrap"></div>
+                <div id="comparePanel" class="compare-panel" style="display:none"></div>
+              </div>
+              <div class="daily-scroll">
+                <div id="dailyChart"></div>
+              </div>
             </div>
           </div>
 
@@ -829,6 +935,10 @@
           <button id="resetSettingsBtn" class="danger">還原預設</button>
         </div>
         <input id="settingsFileInput" type="file" accept=".json" style="display:none">
+        <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+          <p style="font-size:13px;color:var(--muted);margin:0 0 10px">危險區域</p>
+          <button id="clearBtn" class="danger">清空所有名單資料⋯</button>
+        </div>
       </div>
     </div>
   </dialog>
@@ -933,6 +1043,7 @@
     let appSettings = structuredClone(DEFAULT_SETTINGS);
     let duplicateCount = 0;
     let isAgencyMode = false;
+    let agencyDailyBreakdown = {};
 
     // ── 輔助 ─────────────────────────────────────────────────────
     const $ = (id) => document.getElementById(id);
@@ -963,7 +1074,23 @@
 
     // ── 資料載入 ─────────────────────────────────────────────────
     async function loadLeads() {
-      return (await kvGet('leads')) || [];
+      try {
+        const { data, error } = await db.from('leads')
+          .select('*').order('created_at', { ascending: false }).limit(20000);
+        if (error) { console.warn('loadLeads', error.message); return []; }
+        return (data || []).map(row => ({
+          id: row.id,
+          createdAt: row.created_at,
+          branch: row.branch,
+          name: row.name,
+          phone: row.phone,
+          source: row.source,
+          campaign: row.campaign,
+          status: row.status,
+          conversion: row.conversion,
+          note: row.note,
+        }));
+      } catch (e) { console.error('loadLeads exception', e); return []; }
     }
 
     async function loadSummaries() {
@@ -982,10 +1109,61 @@
     }
 
     // ── 資料儲存 ─────────────────────────────────────────────────
-    function saveLeads() {
-      kvSet('leads', leads);
-      // 同步更新廣告商公開彙整（去個資）
+    // 將 lead 物件轉為 Supabase 資料表欄位（camelCase → snake_case）
+    function leadToRow(lead) {
+      return {
+        id: lead.id,
+        created_at: lead.createdAt || today(),
+        branch: lead.branch || '',
+        name: lead.name || '',
+        phone: lead.phone || '',
+        source: lead.source || '',
+        campaign: lead.campaign || '',
+        status: lead.status || '已聯繫',
+        conversion: lead.conversion || '',
+        note: lead.note || '',
+      };
+    }
+
+    // 新增/更新單筆名單
+    async function upsertLead(lead) {
+      try {
+        const { error } = await db.from('leads').upsert(leadToRow(lead), { onConflict: 'id' });
+        if (error) console.warn('upsertLead', error.message);
+        kvSet('public_data', buildPublicData());
+      } catch (e) { console.error('upsertLead exception', e); }
+    }
+
+    // 批次新增/更新（每 500 筆一批，避免逾時）
+    async function upsertLeads(arr) {
+      if (!arr.length) return;
+      const CHUNK = 500;
+      for (let i = 0; i < arr.length; i += CHUNK) {
+        try {
+          const { error } = await db.from('leads')
+            .upsert(arr.slice(i, i + CHUNK).map(leadToRow), { onConflict: 'id' });
+          if (error) console.warn('upsertLeads chunk', i, error.message);
+        } catch (e) { console.error('upsertLeads exception', e); }
+      }
       kvSet('public_data', buildPublicData());
+    }
+
+    // 刪除單筆
+    async function deleteLead(id) {
+      try {
+        const { error } = await db.from('leads').delete().eq('id', id);
+        if (error) console.warn('deleteLead', error.message);
+        kvSet('public_data', buildPublicData());
+      } catch (e) { console.error('deleteLead exception', e); }
+    }
+
+    // 清空所有名單
+    async function clearLeads() {
+      try {
+        const { error } = await db.from('leads').delete().neq('id', '');
+        if (error) console.warn('clearLeads', error.message);
+        kvSet('public_data', buildPublicData());
+      } catch (e) { console.error('clearLeads exception', e); }
     }
 
     function saveSummaries() {
@@ -996,10 +1174,25 @@
       kvSet('settings', appSettings);
     }
 
+    function buildDailyBreakdown() {
+      // 三層結構：{ 'YYYY-MM-DD': { '台北': { 'Facebook 廣告': 2 }, '台中': { ... } } }
+      const result = {};
+      leads.forEach(lead => {
+        const d = lead.createdAt || today();
+        const branch = lead.branch || '未分院';
+        const src = lead.source || '其他';
+        if (!result[d]) result[d] = {};
+        if (!result[d][branch]) result[d][branch] = {};
+        result[d][branch][src] = (result[d][branch][src] || 0) + 1;
+      });
+      return result;
+    }
+
     function buildPublicData() {
       // 僅包含彙整統計，不含姓名/電話
       return {
         reportingSummaries: getReportingSummaries(),
+        dailyBreakdown: buildDailyBreakdown(),
         updated: new Date().toISOString()
       };
     }
@@ -1016,7 +1209,10 @@
     }
 
     function normalizePhone(phone) {
-      return String(phone || "").replace(/[^\d+]/g, "").replace(/^886/, "0");
+      const cleaned = String(phone || "").replace(/[^\d+]/g, "").replace(/^886/, "0");
+      // 補台灣手機前置 0（如 905136187 → 0905136187）
+      if (/^9\d{8}$/.test(cleaned)) return "0" + cleaned;
+      return cleaned;
     }
 
     function normalizeName(name) {
@@ -1162,20 +1358,23 @@
     function addLeads(rows) {
       const existing = new Map(leads.map((lead) => [duplicateKey(lead), lead]));
       let added = 0, updated = 0, skipped = 0;
+      const changed = [];
       rows.map(normalizeLead).forEach((lead) => {
         if (!lead.name && !lead.phone) return;
         const key = duplicateKey(lead);
         if (existing.has(key)) {
-          const changed = mergeLead(existing.get(key), lead);
-          if (changed) updated += 1; else skipped += 1;
+          const wasChanged = mergeLead(existing.get(key), lead);
+          if (wasChanged) { updated += 1; changed.push(existing.get(key)); }
+          else skipped += 1;
           return;
         }
         existing.set(key, lead);
         leads.push(lead);
+        changed.push(lead);
         added += 1;
       });
       duplicateCount += skipped;
-      saveLeads();
+      upsertLeads(changed);
       render();
       return { added, updated, skipped };
     }
@@ -1251,8 +1450,8 @@
       leads = [...byIdentity.values()];
       duplicateCount += removed;
       summaries = summaries.map((summary) => normalizeSummary(summary));
-      saveLeads();
-      saveSummaries();
+      // 只有實際有去重時才寫入，避免每次載入都觸發不必要的 Supabase 寫操作
+      if (removed > 0) { upsertLeads(leads); saveSummaries(); }
     }
 
     function countBy(items, field) {
@@ -1433,8 +1632,7 @@
       $("monthlyReport").innerHTML = month
         ? [
           renderMonthlyCard("全分院", month, "全分院"),
-          renderMonthlyCard("台北", month, "台北"),
-          renderMonthlyCard("台中", month, "台中")
+          ...appSettings.branches.map(b => renderMonthlyCard(b, month, b))
         ].join("")
         : `<p class="hint">尚無可產生月報的彙整資料。</p>`;
     }
@@ -1473,7 +1671,7 @@
         campaign: [lead.campaign, lead.conversion, lead.note].filter(Boolean).join(" "),
         conversion: [lead.conversion, lead.campaign, lead.note].filter(Boolean).join(" ")
       }));
-      saveLeads();
+      upsertLeads(leads);
       render();
     }
 
@@ -1520,6 +1718,230 @@
       `).join("");
     }
 
+    const BRANCH_COLORS = {
+      "台北": { color: "#94a3b8", bg: "#e2e8f0", label: "#475569", border: "#cbd5e1", donutColor: "#475569" },
+      "台中": { color: "#a1a1aa", bg: "#f4f4f5", label: "#3f3f46", border: "#d4d4d8", donutColor: "#a1a1aa" },
+    };
+    // 新分院自動分配色盤（依 appSettings.branches 順序）
+    const AUTO_BRANCH_PALETTE = [
+      { color: "#a78bfa", bg: "#f5f3ff", label: "#5b21b6", border: "#ddd6fe", donutColor: "#a78bfa" },
+      { color: "#34d399", bg: "#f0fdf4", label: "#065f46", border: "#a7f3d0", donutColor: "#34d399" },
+      { color: "#f87171", bg: "#fff1f2", label: "#9f1239", border: "#fecdd3", donutColor: "#f87171" },
+      { color: "#fbbf24", bg: "#fffbeb", label: "#92400e", border: "#fde68a", donutColor: "#fbbf24" },
+    ];
+    function branchColor(branch) {
+      if (BRANCH_COLORS[branch]) return BRANCH_COLORS[branch];
+      const idx = appSettings.branches.indexOf(branch);
+      return AUTO_BRANCH_PALETTE[Math.max(0, idx) % AUTO_BRANCH_PALETTE.length];
+    }
+
+    function renderBranchDonut(breakdown, month) {
+      const el = $('branchDonut');
+      if (!el) return;
+      const counts = {};
+      Object.entries(breakdown).forEach(([date, branches]) => {
+        if (!date.startsWith(month)) return;
+        Object.entries(branches).forEach(([branch, sources]) => {
+          const total = Object.values(sources).reduce((a, b) => a + b, 0);
+          counts[branch] = (counts[branch] || 0) + total;
+        });
+      });
+      const grandTotal = Object.values(counts).reduce((a, b) => a + b, 0);
+      if (!grandTotal) { el.innerHTML = ''; return; }
+
+      const r = 44, cx = 56, cy = 56, sw = 16;
+      const circ = 2 * Math.PI * r;
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      let offset = 0;
+      let arcs = '';
+      let legend = '';
+      entries.forEach(([branch, count]) => {
+        const bc = branchColor(branch);
+        const pct = count / grandTotal;
+        const dash = pct * circ;
+        const dc = bc.donutColor || bc.color;
+        arcs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${dc}" stroke-width="${sw}" stroke-dasharray="${dash.toFixed(2)} ${(circ - dash).toFixed(2)}" stroke-dashoffset="${(-offset * circ).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="round"/>`;
+        offset += pct;
+        legend += `<div class="donut-legend-item"><span class="donut-dot" style="background:${dc}"></span><span style="color:var(--muted)">${branch}</span><strong style="color:var(--ink)">${count}</strong><span style="color:var(--muted);font-size:11px">(${Math.round(pct * 100)}%)</span></div>`;
+      });
+      el.innerHTML = `<div class="donut-wrap">
+        <svg width="112" height="112" viewBox="0 0 112 112">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="${sw}"/>
+          ${arcs}
+          <text x="${cx}" y="${cy - 5}" text-anchor="middle" font-size="18" font-weight="700" fill="#18202a">${grandTotal}</text>
+          <text x="${cx}" y="${cy + 12}" text-anchor="middle" font-size="10" fill="#64748b">總名單</text>
+        </svg>
+        <div class="donut-legend">${legend}</div>
+      </div>`;
+    }
+
+    function renderCompare(breakdown, month, compareMonth) {
+      const panel = $('comparePanel');
+      if (!panel) return;
+      if (!compareMonth) { panel.style.display = 'none'; return; }
+      panel.style.display = '';
+
+      function monthTotal(m) {
+        const byBranch = {};
+        Object.entries(breakdown).forEach(([date, branches]) => {
+          if (!date.startsWith(m)) return;
+          Object.entries(branches).forEach(([branch, sources]) => {
+            const n = Object.values(sources).reduce((a, b) => a + b, 0);
+            byBranch[branch] = (byBranch[branch] || 0) + n;
+          });
+        });
+        return byBranch;
+      }
+
+      const cur = monthTotal(month);
+      const cmp = monthTotal(compareMonth);
+      const allBranches = [...new Set([...Object.keys(cur), ...Object.keys(cmp)])].sort();
+      const maxVal = Math.max(...allBranches.flatMap(b => [cur[b] || 0, cmp[b] || 0]), 1);
+
+      let html = `<p class="compare-title">${month} 對比 ${compareMonth}</p>`;
+      allBranches.forEach(branch => {
+        const bc = branchColor(branch);
+        const cV = cur[branch] || 0, pV = cmp[branch] || 0;
+        const diff = cV - pV;
+        const diffLabel = diff > 0 ? `+${diff}` : `${diff}`;
+        const diffColor = diff > 0 ? '#059669' : diff < 0 ? '#dc2626' : '#64748b';
+        html += `<div class="compare-row">
+          <span style="font-weight:600;color:${bc.label};width:36px">${branch}</span>
+          <div class="compare-bar-wrap">
+            <div class="compare-bar" style="width:${Math.round(cV/maxVal*120)}px;background:${bc.color};color:#fff">${cV > 2 ? cV : ''}</div>
+            <div class="compare-bar" style="width:${Math.round(pV/maxVal*120)}px;background:${bc.bg};color:${bc.label};border:1px solid ${bc.color}">${pV > 2 ? pV : ''}</div>
+          </div>
+          <span style="font-size:12px;font-weight:600;color:${diffColor}">${diffLabel}</span>
+        </div>`;
+      });
+      html += `<div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--muted)">
+        <span>■ ${month}</span><span style="opacity:.6">■ ${compareMonth}</span>
+      </div>`;
+      panel.innerHTML = html;
+    }
+
+    function renderDailyChart() {
+      const el = $('dailyChart');
+      if (!el) return;
+
+      const picker = $('dailyMonthPicker');
+      const selectedMonth = picker?.value || today().slice(0, 7);
+      if (picker && !picker.value) picker.value = selectedMonth;
+
+      const compareMonth = $('dailyComparePicker')?.value || '';
+      const breakdown = isAgencyMode ? agencyDailyBreakdown : buildDailyBreakdown();
+
+      // 甜甜圈 + 比較
+      renderBranchDonut(breakdown, selectedMonth);
+      renderCompare(breakdown, selectedMonth, compareMonth);
+
+      // 產生該月所有日期
+      const [yr, mo] = selectedMonth.split('-').map(Number);
+      const daysInMonth = new Date(yr, mo, 0).getDate();
+      const allDays = Array.from({ length: daysInMonth }, (_, i) =>
+        `${selectedMonth}-${String(i + 1).padStart(2, '0')}`
+      );
+      const activeDays = allDays.filter(d => breakdown[d] && Object.keys(breakdown[d]).length > 0);
+
+      if (activeDays.length === 0) {
+        el.innerHTML = `<p style="color:var(--muted);padding:8px 0;font-size:13px">${selectedMonth} 尚無資料</p>`;
+        return;
+      }
+
+      const branchSet = new Set();
+      activeDays.forEach(d => Object.keys(breakdown[d] || {}).forEach(b => branchSet.add(b)));
+      const branches = [
+        ...appSettings.branches.filter(b => branchSet.has(b)),
+        ...[...branchSet].filter(b => !appSettings.branches.includes(b)).sort()
+      ];
+
+      function branchSources(branch) {
+        const cnt = {};
+        activeDays.forEach(d => {
+          Object.entries(breakdown[d]?.[branch] || {}).forEach(([src, n]) => {
+            cnt[src] = (cnt[src] || 0) + n;
+          });
+        });
+        return Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([s]) => s);
+      }
+
+      // 表頭（只顯示日數字）
+      let html = '<table class="daily-table"><thead><tr>'
+        + '<th style="text-align:left;position:sticky;left:0;background:#fff;z-index:2;padding:4px 8px 8px;min-width:140px">來源</th>';
+      activeDays.forEach(d => { html += `<th>${Number(d.slice(8))}</th>`; });
+      html += '<th style="font-weight:700;color:var(--ink);padding-left:8px">合計</th></tr></thead><tbody>';
+
+      const grandByDay = {};
+      let grandTotal = 0;
+
+      branches.forEach((branch, bi) => {
+        const bc = branchColor(branch);
+        const srcRows = branchSources(branch);
+        const branchByDay = {};
+        let branchTotal = 0;
+
+        // 院區 header 行（帶分隔）
+        html += `<tr class="branch-header-row">
+          <td colspan="${activeDays.length + 2}" style="background:${bc.bg};color:${bc.label};border-left:3px solid ${bc.color}">
+            ${branch}
+          </td>
+        </tr>`;
+
+        // 來源明細列
+        srcRows.forEach(src => {
+          let srcTotal = 0;
+          let cells = '';
+          activeDays.forEach(d => {
+            const v = breakdown[d]?.[branch]?.[src] || 0;
+            srcTotal += v;
+            branchByDay[d] = (branchByDay[d] || 0) + v;
+            cells += `<td style="text-align:center;padding:3px 4px;font-size:12px;color:${v ? bc.label : '#d1d5db'}">${v || '·'}</td>`;
+          });
+          branchTotal += srcTotal;
+          html += `<tr style="background:#fff">
+            <td style="position:sticky;left:0;background:#fff;z-index:1;padding:3px 8px 3px 14px;border-left:3px solid ${bc.border}">${chip(src)}</td>
+            ${cells}
+            <td style="text-align:center;font-size:12px;font-weight:600;color:${bc.label};padding-left:8px">${srcTotal || '—'}</td>
+          </tr>`;
+        });
+
+        // 院區小計列
+        let subCells = '';
+        activeDays.forEach(d => {
+          const v = branchByDay[d] || 0;
+          grandByDay[d] = (grandByDay[d] || 0) + v;
+          subCells += `<td style="text-align:center;padding:4px;font-weight:700;color:${bc.label};background:${bc.bg}">${v || '·'}</td>`;
+        });
+        grandTotal += branchTotal;
+        html += `<tr>
+          <td style="position:sticky;left:0;z-index:1;padding:4px 8px;font-weight:700;color:${bc.label};background:${bc.bg};border-left:3px solid ${bc.color}">${branch} 小計</td>
+          ${subCells}
+          <td style="text-align:center;font-weight:700;color:${bc.label};background:${bc.bg};padding-left:8px">${branchTotal}</td>
+        </tr>`;
+
+        // 院區間空白行
+        if (bi < branches.length - 1) {
+          html += `<tr class="branch-spacer"><td colspan="${activeDays.length + 2}"></td></tr>`;
+        }
+      });
+
+      // 每日總數列
+      let totalCells = '';
+      activeDays.forEach(d => {
+        const v = grandByDay[d] || 0;
+        grandTotal; // already summed above
+        totalCells += `<td style="text-align:center;padding:5px 4px;font-weight:700;color:#fff">${v || '·'}</td>`;
+      });
+      html += `<tr class="daily-total-row">
+        <td style="position:sticky;left:0;z-index:1;padding:5px 8px;font-weight:700;background:#6b7280;color:#fff">每日總數</td>
+        ${totalCells}
+        <td style="text-align:center;font-weight:700;background:#6b7280;color:#fff;padding-left:8px">${grandTotal}</td>
+      </tr>`;
+
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
     function render() {
       renderFilters();
       const filtered = getFilteredLeads();
@@ -1527,6 +1949,7 @@
       renderChart("sourceChart", countBy(leads, "source"));
       renderChart("statusChart", countBy(leads, "status"));
       renderChart("publicSourceChart", countSummaryBy(getReportingSummaries(), "source"));
+      renderDailyChart();
       renderMonthlyReport();
       renderRows(filtered);
     }
@@ -1559,18 +1982,24 @@
 
     async function importFile(file) {
       if (!window.XLSX) { alert("Excel 解析套件尚未載入，請確認網路可連線，或改用 CSV 貼上匯入。"); return; }
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-      if ($("importMode").value === "summary") {
-        const result = addSummaries(parseSummaryRows(rows, file.name));
-        alert(`已新增 ${result.added} 列廣告商彙整，重複略過 ${result.skipped} 列。`);
-      } else {
-        const result = addLeads(parseDetailRows(rows, file.name));
-        alert(`已新增 ${result.added} 筆，更新 ${result.updated} 筆，重複未變更 ${result.skipped} 筆。`);
+      try {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        if ($("importMode").value === "summary") {
+          const result = addSummaries(parseSummaryRows(rows, file.name));
+          alert(`已新增 ${result.added} 列廣告商彙整，重複略過 ${result.skipped} 列。`);
+        } else {
+          const result = addLeads(parseDetailRows(rows, file.name));
+          alert(`已新增 ${result.added} 筆，更新 ${result.updated} 筆，重複未變更 ${result.skipped} 筆。`);
+        }
+      } catch (e) {
+        console.error("importFile error", e);
+        alert(`檔案解析失敗：${e.message || "請確認格式為 .xlsx 或 .csv"}`);
+      } finally {
+        $("fileInput").value = "";
       }
-      $("fileInput").value = "";
     }
 
     function parseDetailRows(rows, filename) {
@@ -1794,6 +2223,7 @@
               ? saved.branches : DEFAULT_SETTINGS.branches
           };
           summaries = publicData?.reportingSummaries || [];
+          agencyDailyBreakdown = publicData?.dailyBreakdown || {};
           leads = []; // 廣告商模式不載入個資
           renderBranchOptions();
           applyViewMode("agency");
@@ -1828,8 +2258,9 @@
     });
 
     $("addBlankBtn").addEventListener("click", () => {
-      leads.unshift(normalizeLead({ 院區: "未分院", 姓名: "", 電話: "", 來源渠道: "未分類", 狀態: "已聯繫", 建立日期: today() }));
-      saveLeads();
+      const newLead = normalizeLead({ 院區: "未分院", 姓名: "", 電話: "", 來源渠道: "未分類", 狀態: "已聯繫", 建立日期: today() });
+      leads.unshift(newLead);
+      upsertLead(newLead);
       render();
     });
 
@@ -1844,7 +2275,14 @@
 
     $("fileInput").addEventListener("change", (event) => {
       const file = event.target.files[0];
-      if (file) importFile(file);
+      const btn = $("importFileBtn");
+      if (btn) btn.disabled = !file;
+    });
+
+    $("importFileBtn").addEventListener("click", () => {
+      const file = $("fileInput").files[0];
+      if (!file) { alert("請先選擇 Excel 或 CSV 檔案。"); return; }
+      importFile(file);
     });
 
     $("exportBtn").addEventListener("click", () => {
@@ -1883,7 +2321,7 @@
     $("clearBtn").addEventListener("click", () => {
       if (confirm("確定要清空所有名單資料？建議先匯出備份。")) {
         leads = []; summaries = []; duplicateCount = 0;
-        saveLeads(); saveSummaries(); render();
+        clearLeads(); saveSummaries(); render();
       }
     });
 
@@ -1894,7 +2332,7 @@
       const lead = leads.find((item) => item.id === row.dataset.id);
       if (!lead) return;
       lead[field] = event.target.value;
-      saveLeads();
+      upsertLead(lead);
       render();
     });
 
@@ -1902,8 +2340,8 @@
       const id = event.target.dataset.delete;
       if (!id) return;
       leads = leads.filter((lead) => lead.id !== id);
-      saveLeads();
       render();
+      deleteLead(id);
     });
 
     ["searchInput", "sourceFilter", "statusFilter", "dateFrom", "dateTo"].forEach((id) => {
@@ -1911,6 +2349,20 @@
     });
 
     $("monthReportSelect").addEventListener("input", renderMonthlyReport);
+
+    $("dailyMonthPicker").addEventListener("change", renderDailyChart);
+    $("dailyComparePicker").addEventListener("change", renderDailyChart);
+
+    // 匯出下拉選單
+    $("exportDropBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const menu = $("exportMenu");
+      menu.style.display = menu.style.display === "none" ? "flex" : "none";
+    });
+    document.addEventListener("click", () => {
+      const menu = $("exportMenu");
+      if (menu) menu.style.display = "none";
+    });
 
     $("summaryBtn").addEventListener("click", () => {
       $("summaryText").value = buildSummaryPrompt();
