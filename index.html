@@ -636,6 +636,42 @@
       .row, .toolbar { grid-template-columns: 1fr; }
       .mode-note { margin-left: 0; }
     }
+
+    /* ── 密碼登入 Modal ───────────────────────────────── */
+    #pwModal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,23,42,0.45); z-index: 9999;
+      align-items: center; justify-content: center;
+    }
+    #pwModal.show { display: flex; }
+    .pw-card {
+      background: #fff; border-radius: 18px; padding: 44px 40px;
+      width: 360px; box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .pw-card h2 { margin: 0 0 6px; font-size: 20px; color: var(--ink); }
+    .pw-card p  { margin: 0 0 24px; font-size: 13px; color: var(--muted); }
+    .pw-card input[type=password], .pw-card input[type=text] {
+      width: 100%; box-sizing: border-box;
+      border: 1px solid #e5e7eb; border-radius: 9px;
+      padding: 11px 13px; font-size: 15px; margin-bottom: 8px;
+      outline: none; transition: border-color .15s;
+    }
+    .pw-card input[type=password]:focus, .pw-card input[type=text]:focus { border-color: #94a3b8; }
+    .pw-error { color: #dc2626; font-size: 13px; min-height: 20px; margin-bottom: 10px; }
+    .pw-card .pw-submit { width: 100%; padding: 11px; font-size: 15px; }
+    .pw-footer { margin-top: 18px; text-align: center; }
+    .pw-footer a { color: var(--muted); font-size: 13px; text-decoration: none; }
+    .pw-footer a:hover { color: var(--ink); }
+    #backToAdminBtn {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1f2937; color: #fff; border: none;
+      border-radius: 10px; padding: 10px 18px; font-size: 13px;
+      font-weight: 500; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      z-index: 100; opacity: 0.85; transition: opacity .15s;
+    }
+    #backToAdminBtn:hover { opacity: 1; }
+    body:not(.agency-mode) #backToAdminBtn { display: none; }
   </style>
 </head>
 <body>
@@ -792,8 +828,9 @@
               <h2>每日新增人數</h2>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                 <input type="month" id="dailyMonthPicker" style="border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer;">
-                <span style="font-size:12px;color:var(--muted)">對比</span>
+                <span style="font-size:12px;color:var(--muted)" id="dailyCompareLabel">對比</span>
                 <input type="month" id="dailyComparePicker" style="border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer;">
+                <button id="dailyDetailToggle" style="font-size:12px;padding:4px 10px">展開院區對比</button>
               </div>
             </div>
             <div class="panel-body">
@@ -804,6 +841,24 @@
               <div class="daily-scroll">
                 <div id="dailyChart"></div>
               </div>
+            </div>
+          </div>
+
+          <!-- 廣告活動備註 panel（內部可新增，廣告商唯讀） -->
+          <div class="panel" id="agencyNotesPanel">
+            <div class="panel-head">
+              <h2>📝 廣告活動備註</h2>
+              <button id="addNoteBtn" data-internal-only style="display:none">＋ 新增備註</button>
+            </div>
+            <!-- 新增備註表單（內部模式才顯示） -->
+            <div id="addNoteForm" data-internal-only style="display:none;padding:12px 16px 0;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line)">
+              <input type="date" id="noteDate" style="padding:7px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;color:var(--ink)">
+              <input type="text" id="noteText" placeholder="例：FB廣告預算增加 50%" style="flex:1;min-width:200px;padding:7px 12px;border:1px solid var(--line);border-radius:7px;font-size:13px">
+              <button id="saveNoteBtn" class="primary" style="white-space:nowrap">儲存</button>
+              <button id="cancelNoteBtn" style="white-space:nowrap">取消</button>
+            </div>
+            <div class="panel-body">
+              <div id="agencyNotesList"></div>
             </div>
           </div>
 
@@ -935,6 +990,18 @@
           <button id="resetSettingsBtn" class="danger">還原預設</button>
         </div>
         <input id="settingsFileInput" type="file" accept=".json" style="display:none">
+        <!-- 帳號管理 -->
+        <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
+          <p style="font-size:14px;font-weight:600;margin:0 0 12px">帳號管理</p>
+          <p class="hint" style="margin-bottom:12px">可用生日或英文名作為帳號，方便記憶。</p>
+          <div id="accountsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input id="newUnameInput" type="text" placeholder="帳號" autocorrect="off" autocapitalize="none" spellcheck="false" style="flex:1;min-width:100px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px">
+            <input id="newPwInput" type="password" placeholder="密碼" style="flex:1;min-width:100px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px">
+            <button id="addAccountBtn" class="primary" style="white-space:nowrap">新增帳號</button>
+          </div>
+        </div>
+
         <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px">
           <p style="font-size:13px;color:var(--muted);margin:0 0 10px">危險區域</p>
           <button id="clearBtn" class="danger">清空所有名單資料⋯</button>
@@ -942,6 +1009,25 @@
       </div>
     </div>
   </dialog>
+
+
+  <!-- 密碼登入 Modal -->
+  <div id="pwModal">
+    <div class="pw-card">
+      <h2>正欣診所後台</h2>
+      <p>請輸入帳號密碼以進入內部後台</p>
+      <input id="unameInput" type="text" placeholder="帳號" autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false">
+      <input id="pwInput" type="password" placeholder="密碼" autocomplete="current-password">
+      <div id="pwError" class="pw-error"></div>
+      <button id="pwSubmit" class="primary pw-submit">登入後台</button>
+      <div class="pw-footer">
+        <a href="#" id="agencyViewLink">廣告商前台（不需密碼）→</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 廣告商前台：回到後台按鈕 -->
+  <button id="backToAdminBtn">🔒 回到內部後台</button>
 
   <!-- 載入中 Overlay -->
   <div id="loadingOverlay">
@@ -965,6 +1051,7 @@
 
     // ── 常數 ────────────────────────────────────────────────────
     const VIEW_STORAGE_KEY = "chenghsin-dashboard-view-mode";
+    const DEFAULT_ADMIN_PASSWORD = "9423881601"; // 預設密碼，可在後台設定中修改
     const STATUSES = ["已聯繫", "已轉換", "未接通"];
     const STATUS_COLORS = {
       "已聯繫": { bg: "#e8f1fb", fg: "#315f8f", line: "#c9dcef" },
@@ -1014,7 +1101,7 @@
       status:    ["狀態", "跟進狀態", "名單狀態", "已轉換正式", "status"],
       conversion:["轉換", "轉換項目", "成交項目", "療程", "諮詢原因", "conversion"],
       note:      ["備註", "說明", "note", "notes"],
-      createdAt: ["日期", "建立日期", "新增日期", "createdAt", "created_at"]
+      createdAt: ["日期", "建立日期", "新增日期", "就診日", "諮詢日", "預約日", "名單日期", "聯繫日", "初診日", "createdAt", "created_at", "date"]
     };
     const COLOR_PRESETS = {
       "淺橘": { bg: "#f7e6cf", fg: "#8f5b24", line: "#edcfaa" },
@@ -1034,7 +1121,9 @@
         "不清楚來源": "灰", "其他": "灰", "全部來源": "灰"
       },
       therapyRules: THERAPY_RULES,
-      branches: ["台北", "台中"]
+      branches: ["台北", "台中"],
+      accounts: [{ username: "admin", password: "9423881601" }],
+      dailyNotes: {}
     };
 
     // ── 應用狀態 ─────────────────────────────────────────────────
@@ -1044,6 +1133,8 @@
     let duplicateCount = 0;
     let isAgencyMode = false;
     let agencyDailyBreakdown = {};
+    let agencyDailyNotes = {};
+    let dailyDetailExpanded = false;
 
     // ── 輔助 ─────────────────────────────────────────────────────
     const $ = (id) => document.getElementById(id);
@@ -1104,7 +1195,10 @@
         therapyRules: Array.isArray(saved.therapyRules) && saved.therapyRules.length
           ? saved.therapyRules : DEFAULT_SETTINGS.therapyRules,
         branches: Array.isArray(saved.branches) && saved.branches.length
-          ? saved.branches : DEFAULT_SETTINGS.branches
+          ? saved.branches : DEFAULT_SETTINGS.branches,
+        accounts: Array.isArray(saved.accounts) && saved.accounts.length
+          ? saved.accounts : DEFAULT_SETTINGS.accounts,
+        dailyNotes: (saved.dailyNotes && typeof saved.dailyNotes === 'object') ? saved.dailyNotes : DEFAULT_SETTINGS.dailyNotes
       };
     }
 
@@ -1193,6 +1287,7 @@
       return {
         reportingSummaries: getReportingSummaries(),
         dailyBreakdown: buildDailyBreakdown(),
+        dailyNotes: appSettings.dailyNotes || {},
         updated: new Date().toISOString()
       };
     }
@@ -1209,8 +1304,12 @@
     }
 
     function normalizePhone(phone) {
-      const cleaned = String(phone || "").replace(/[^\d+]/g, "").replace(/^886/, "0");
-      // 補台灣手機前置 0（如 905136187 → 0905136187）
+      // 移除所有非數字字元（保留 + 號）→ 去除國碼 +886 / 886
+      const cleaned = String(phone || "")
+        .replace(/[^\d+]/g, "")
+        .replace(/^\+886/, "0")   // +886912345678 → 0912345678
+        .replace(/^886/, "0");    // 886912345678  → 0912345678
+      // 補台灣手機前置 0（Excel 去零後如 912345678 → 0912345678）
       if (/^9\d{8}$/.test(cleaned)) return "0" + cleaned;
       return cleaned;
     }
@@ -1298,18 +1397,35 @@
 
     function normalizeDate(value) {
       if (!value) return today();
+      // Excel 序號日期（數字）
       if (typeof value === "number" && window.XLSX) {
         const parsed = XLSX.SSF.parse_date_code(value);
         if (parsed) return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
       }
-      const date = new Date(value);
-      if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
       const text = String(value).trim();
-      const monthDay = text.match(/(\d{1,2})\s*[月/]\s*(\d{1,2})?/);
+      // 民國年：如 113/04/15 或 113年04月15日
+      const roc = text.match(/^(\d{2,3})[年/\.](\d{1,2})[月/\.](\d{1,2})/);
+      if (roc && Number(roc[1]) < 200) {
+        const y = Number(roc[1]) + 1911;
+        return `${y}-${String(roc[2]).padStart(2,"0")}-${String(roc[3]).padStart(2,"0")}`;
+      }
+      // YYYY年MM月DD日 全中文格式
+      const cjk = text.match(/(\d{4})年(\d{1,2})月(\d{1,2})/);
+      if (cjk) return `${cjk[1]}-${String(cjk[2]).padStart(2,"0")}-${String(cjk[3]).padStart(2,"0")}`;
+      // YYYY/MM/DD 或 YYYY.MM.DD（Safari 不支援斜線，統一換成橫線）
+      const slash = text.match(/^(\d{4})[/\.](\d{1,2})[/\.](\d{1,2})/);
+      if (slash) return `${slash[1]}-${String(slash[2]).padStart(2,"0")}-${String(slash[3]).padStart(2,"0")}`;
+      // MM/DD/YYYY 美式
+      const us = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (us) return `${us[3]}-${String(us[1]).padStart(2,"0")}-${String(us[2]).padStart(2,"0")}`;
+      // 其他 ISO / 標準格式
+      const iso = text.replace(/\//g, "-");
+      const date = new Date(iso);
+      if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+      // 月/日（無年份）
+      const monthDay = text.match(/(\d{1,2})\s*[月/]\s*(\d{1,2})/);
       if (monthDay) {
-        const month = String(monthDay[1]).padStart(2, "0");
-        const day = String(monthDay[2] || 1).padStart(2, "0");
-        return `${new Date().getFullYear()}-${month}-${day}`;
+        return `${new Date().getFullYear()}-${String(monthDay[1]).padStart(2,"0")}-${String(monthDay[2]).padStart(2,"0")}`;
       }
       return today();
     }
@@ -1637,12 +1753,36 @@
         : `<p class="hint">尚無可產生月報的彙整資料。</p>`;
     }
 
+    function renderAccountsList() {
+      const list = $("accountsList");
+      if (!list) return;
+      const accounts = appSettings.accounts || DEFAULT_SETTINGS.accounts;
+      list.innerHTML = accounts.map((a, idx) => `
+        <div style="display:flex;align-items:center;gap:8px;background:var(--bg2,#f8f9fa);padding:8px 12px;border-radius:8px;border:1px solid var(--line)">
+          <span style="font-size:13px;font-weight:600;flex:1">${a.username}</span>
+          <span style="font-size:12px;color:var(--muted);letter-spacing:2px">●●●●●●</span>
+          ${accounts.length > 1
+            ? `<button onclick="deleteAccount(${idx})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px" title="刪除帳號">✕</button>`
+            : '<span style="font-size:12px;color:var(--muted)">(最後一個，無法刪除)</span>'}
+        </div>`).join('');
+    }
+
+    window.deleteAccount = function(idx) {
+      const accounts = appSettings.accounts || DEFAULT_SETTINGS.accounts;
+      if (accounts.length <= 1) { alert("至少保留一個帳號。"); return; }
+      if (!confirm(`確定要刪除帳號「${accounts[idx].username}」？`)) return;
+      appSettings.accounts = accounts.filter((_, i) => i !== idx);
+      saveSettings();
+      renderAccountsList();
+    };
+
     function settingsToText() {
       $("sourceSettingsInput").value = Object.entries(appSettings.sourceGroups)
         .map(([source, group]) => `${source}=${group}`).join("\n");
       $("therapySettingsInput").value = appSettings.therapyRules
         .map((rule) => `${rule.tag}=${rule.keywords.join(",")}`).join("\n");
       $("branchSettingsInput").value = appSettings.branches.join("\n");
+      renderAccountsList();
     }
 
     function parseSettingsText() {
@@ -1660,7 +1800,9 @@
       return {
         sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...sourceGroups },
         therapyRules: therapyRules.length ? therapyRules : DEFAULT_SETTINGS.therapyRules,
-        branches: branches.length ? branches : DEFAULT_SETTINGS.branches
+        branches: branches.length ? branches : DEFAULT_SETTINGS.branches,
+        accounts: appSettings.accounts || DEFAULT_SETTINGS.accounts,
+        dailyNotes: appSettings.dailyNotes || DEFAULT_SETTINGS.dailyNotes
       };
     }
 
@@ -1865,81 +2007,105 @@
         return Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([s]) => s);
       }
 
-      // 表頭（只顯示日數字）
-      let html = '<table class="daily-table"><thead><tr>'
-        + '<th style="text-align:left;position:sticky;left:0;background:#fff;z-index:2;padding:4px 8px 8px;min-width:140px">來源</th>';
-      activeDays.forEach(d => { html += `<th>${Number(d.slice(8))}</th>`; });
-      html += '<th style="font-weight:700;color:var(--ink);padding-left:8px">合計</th></tr></thead><tbody>';
-
+      // ── 計算每日總數 ──
       const grandByDay = {};
       let grandTotal = 0;
-
-      branches.forEach((branch, bi) => {
-        const bc = branchColor(branch);
-        const srcRows = branchSources(branch);
-        const branchByDay = {};
-        let branchTotal = 0;
-
-        // 院區 header 行（帶分隔）
-        html += `<tr class="branch-header-row">
-          <td colspan="${activeDays.length + 2}" style="background:${bc.bg};color:${bc.label};border-left:3px solid ${bc.color}">
-            ${branch}
-          </td>
-        </tr>`;
-
-        // 來源明細列
-        srcRows.forEach(src => {
-          let srcTotal = 0;
-          let cells = '';
-          activeDays.forEach(d => {
-            const v = breakdown[d]?.[branch]?.[src] || 0;
-            srcTotal += v;
-            branchByDay[d] = (branchByDay[d] || 0) + v;
-            cells += `<td style="text-align:center;padding:3px 4px;font-size:12px;color:${v ? bc.label : '#d1d5db'}">${v || '·'}</td>`;
-          });
-          branchTotal += srcTotal;
-          html += `<tr style="background:#fff">
-            <td style="position:sticky;left:0;background:#fff;z-index:1;padding:3px 8px 3px 14px;border-left:3px solid ${bc.border}">${chip(src)}</td>
-            ${cells}
-            <td style="text-align:center;font-size:12px;font-weight:600;color:${bc.label};padding-left:8px">${srcTotal || '—'}</td>
-          </tr>`;
-        });
-
-        // 院區小計列
-        let subCells = '';
+      branches.forEach(branch => {
         activeDays.forEach(d => {
-          const v = branchByDay[d] || 0;
+          const v = Object.values(breakdown[d]?.[branch] || {}).reduce((s,n) => s+n, 0);
           grandByDay[d] = (grandByDay[d] || 0) + v;
-          subCells += `<td style="text-align:center;padding:4px;font-weight:700;color:${bc.label};background:${bc.bg}">${v || '·'}</td>`;
+          grandTotal += v;
         });
-        grandTotal += branchTotal;
-        html += `<tr>
-          <td style="position:sticky;left:0;z-index:1;padding:4px 8px;font-weight:700;color:${bc.label};background:${bc.bg};border-left:3px solid ${bc.color}">${branch} 小計</td>
-          ${subCells}
-          <td style="text-align:center;font-weight:700;color:${bc.label};background:${bc.bg};padding-left:8px">${branchTotal}</td>
+      });
+      const maxDay = Math.max(...Object.values(grandByDay), 1);
+
+      // ── 同步切換按鈕文字 ──
+      const toggleBtn = $('dailyDetailToggle');
+      if (toggleBtn) toggleBtn.textContent = dailyDetailExpanded ? '收合院區對比' : '展開院區對比';
+
+      if (!dailyDetailExpanded) {
+        // ── 簡單日期檢視：每日合計橫條 ──
+        let html = '<div style="display:flex;flex-direction:column;gap:4px;padding:4px 0">';
+        activeDays.forEach(d => {
+          const v = grandByDay[d] || 0;
+          const pct = Math.round((v / maxDay) * 100);
+          const label = `${Number(d.slice(5,7))}/${Number(d.slice(8))}`;
+          html += `<div style="display:flex;align-items:center;gap:8px;font-size:13px">
+            <span style="width:36px;text-align:right;color:var(--muted);flex-shrink:0">${label}</span>
+            <div style="flex:1;background:#f1f5f9;border-radius:4px;height:18px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:#6b7280;border-radius:4px;transition:width .3s"></div>
+            </div>
+            <span style="width:28px;font-weight:600;color:var(--ink)">${v}</span>
+          </div>`;
+        });
+        html += '</div>';
+        el.innerHTML = html;
+      } else {
+        // ── 院區對比詳細表格 ──
+        let html = '<table class="daily-table"><thead><tr>'
+          + '<th style="text-align:left;position:sticky;left:0;background:#fff;z-index:2;padding:4px 8px 8px;min-width:140px">來源</th>';
+        activeDays.forEach(d => { html += `<th style="white-space:nowrap">${Number(d.slice(5,7))}/${Number(d.slice(8))}</th>`; });
+        html += '<th style="font-weight:700;color:var(--ink);padding-left:8px">合計</th></tr></thead><tbody>';
+
+        branches.forEach((branch, bi) => {
+          const bc = branchColor(branch);
+          const srcRows = branchSources(branch);
+          const branchByDay = {};
+          let branchTotal = 0;
+
+          html += `<tr class="branch-header-row">
+            <td colspan="${activeDays.length + 2}" style="background:${bc.bg};color:${bc.label};border-left:3px solid ${bc.color}">
+              ${branch}
+            </td>
+          </tr>`;
+
+          srcRows.forEach(src => {
+            let srcTotal = 0;
+            let cells = '';
+            activeDays.forEach(d => {
+              const v = breakdown[d]?.[branch]?.[src] || 0;
+              srcTotal += v;
+              branchByDay[d] = (branchByDay[d] || 0) + v;
+              cells += `<td style="text-align:center;padding:3px 4px;font-size:12px;color:${v ? bc.label : '#d1d5db'}">${v || '·'}</td>`;
+            });
+            branchTotal += srcTotal;
+            html += `<tr style="background:#fff">
+              <td style="position:sticky;left:0;background:#fff;z-index:1;padding:3px 8px 3px 14px;border-left:3px solid ${bc.border}">${chip(src)}</td>
+              ${cells}
+              <td style="text-align:center;font-size:12px;font-weight:600;color:${bc.label};padding-left:8px">${srcTotal || '—'}</td>
+            </tr>`;
+          });
+
+          let subCells = '';
+          activeDays.forEach(d => {
+            const v = branchByDay[d] || 0;
+            subCells += `<td style="text-align:center;padding:4px;font-weight:700;color:${bc.label};background:${bc.bg}">${v || '·'}</td>`;
+          });
+          html += `<tr>
+            <td style="position:sticky;left:0;z-index:1;padding:4px 8px;font-weight:700;color:${bc.label};background:${bc.bg};border-left:3px solid ${bc.color}">${branch} 小計</td>
+            ${subCells}
+            <td style="text-align:center;font-weight:700;color:${bc.label};background:${bc.bg};padding-left:8px">${branchTotal}</td>
+          </tr>`;
+
+          if (bi < branches.length - 1) {
+            html += `<tr class="branch-spacer"><td colspan="${activeDays.length + 2}"></td></tr>`;
+          }
+        });
+
+        let totalCells = '';
+        activeDays.forEach(d => {
+          const v = grandByDay[d] || 0;
+          totalCells += `<td style="text-align:center;padding:5px 4px;font-weight:700;color:#fff">${v || '·'}</td>`;
+        });
+        html += `<tr class="daily-total-row">
+          <td style="position:sticky;left:0;z-index:1;padding:5px 8px;font-weight:700;background:#6b7280;color:#fff">每日總數</td>
+          ${totalCells}
+          <td style="text-align:center;font-weight:700;background:#6b7280;color:#fff;padding-left:8px">${grandTotal}</td>
         </tr>`;
 
-        // 院區間空白行
-        if (bi < branches.length - 1) {
-          html += `<tr class="branch-spacer"><td colspan="${activeDays.length + 2}"></td></tr>`;
-        }
-      });
-
-      // 每日總數列
-      let totalCells = '';
-      activeDays.forEach(d => {
-        const v = grandByDay[d] || 0;
-        grandTotal; // already summed above
-        totalCells += `<td style="text-align:center;padding:5px 4px;font-weight:700;color:#fff">${v || '·'}</td>`;
-      });
-      html += `<tr class="daily-total-row">
-        <td style="position:sticky;left:0;z-index:1;padding:5px 8px;font-weight:700;background:#6b7280;color:#fff">每日總數</td>
-        ${totalCells}
-        <td style="text-align:center;font-weight:700;background:#6b7280;color:#fff;padding-left:8px">${grandTotal}</td>
-      </tr>`;
-
-      html += '</tbody></table>';
-      el.innerHTML = html;
+        html += '</tbody></table>';
+        el.innerHTML = html;
+      }
     }
 
     function render() {
@@ -1949,10 +2115,69 @@
       renderChart("sourceChart", countBy(leads, "source"));
       renderChart("statusChart", countBy(leads, "status"));
       renderChart("publicSourceChart", countSummaryBy(getReportingSummaries(), "source"));
-      renderDailyChart();
+      try { renderDailyChart(); } catch(e) { console.error('[renderDailyChart]', e); }
+      renderAgencyNotes();
       renderMonthlyReport();
       renderRows(filtered);
     }
+
+    // ── 廣告活動備註（獨立 panel，不混入名單資料）────────────────────────
+    function renderAgencyNotes() {
+      const list = $('agencyNotesList');
+      if (!list) return;
+
+      // 顯示/隱藏新增按鈕（只有內部模式）
+      const addBtn = $('addNoteBtn');
+      const addForm = $('addNoteForm');
+      if (addBtn) addBtn.style.display = isAgencyMode ? 'none' : '';
+      if (addForm) addForm.style.display = 'none'; // 每次 render 重置收起
+
+      const notes = isAgencyMode ? agencyDailyNotes : (appSettings.dailyNotes || {});
+      const entries = Object.entries(notes).sort((a, b) => b[0].localeCompare(a[0])); // 最新在上
+
+      if (entries.length === 0) {
+        list.innerHTML = isAgencyMode
+          ? `<p style="color:var(--muted);font-size:13px;padding:8px 0">尚無備註。</p>`
+          : `<p style="color:var(--muted);font-size:13px;padding:8px 0">尚無備註。點擊右上角「＋ 新增備註」按鈕可新增。</p>`;
+        return;
+      }
+
+      list.innerHTML = entries.map(([date, text]) => {
+        const [y, m, d] = date.split('-');
+        const label = `${Number(m)}/${Number(d)}`;
+        const editBtns = isAgencyMode ? '' : `
+          <button onclick="startEditNote('${date}')" style="background:none;border:1px solid var(--line);border-radius:5px;padding:2px 8px;font-size:12px;color:var(--muted);cursor:pointer;margin-left:8px">編輯</button>
+          <button onclick="deleteNote('${date}')" style="background:none;border:1px solid #fecaca;border-radius:5px;padding:2px 8px;font-size:12px;color:#ef4444;cursor:pointer;margin-left:4px">刪除</button>`;
+        return `
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">
+            <span style="flex-shrink:0;background:#fef3c7;color:#92400e;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:700;white-space:nowrap">${label}</span>
+            <span style="flex:1;font-size:14px;color:var(--ink);line-height:1.5">${text}</span>
+            ${editBtns}
+          </div>`;
+      }).join('');
+    }
+
+    window.startEditNote = function(date) {
+      const form = $('addNoteForm');
+      const dateInput = $('noteDate');
+      const textInput = $('noteText');
+      if (!form || !dateInput || !textInput) return;
+      dateInput.value = date;
+      textInput.value = (appSettings.dailyNotes || {})[date] || '';
+      form.style.display = 'flex';
+      textInput.focus();
+      // Scroll form into view
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.deleteNote = function(date) {
+      const [y, m, d] = date.split('-');
+      if (!confirm(`確定刪除 ${Number(m)}/${Number(d)} 的備註？`)) return;
+      if (appSettings.dailyNotes) delete appSettings.dailyNotes[date];
+      saveSettings();
+      kvSet('public_data', buildPublicData());
+      renderAgencyNotes();
+    };
 
     function countSummaryBy(items, field) {
       return items.reduce((acc, item) => {
@@ -1980,24 +2205,70 @@
       return rows.map((cells) => Object.fromEntries(headers.map((header, index) => [header, cells[index] || ""])));
     }
 
+    // ── CSV 編碼自動偵測（解決 BIG5 亂碼問題）────────────────────────────
+    async function readCSVText(buffer) {
+      const bytes = new Uint8Array(buffer);
+      // 1. UTF-8 BOM（EF BB BF）→ 明確 UTF-8
+      if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+        return new TextDecoder("utf-8").decode(buffer);
+      }
+      // 2. 嘗試嚴格 UTF-8 解碼
+      try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+      } catch (_) {}
+      // 3. 台灣 BIG5（繁體中文 Windows 預設）
+      try {
+        return new TextDecoder("big5").decode(buffer);
+      } catch (_) {}
+      // 4. 簡體中文 GB2312
+      try {
+        return new TextDecoder("gb2312").decode(buffer);
+      } catch (_) {}
+      // 5. 最後備援：寬鬆 UTF-8
+      return new TextDecoder("utf-8").decode(buffer);
+    }
+
     async function importFile(file) {
       if (!window.XLSX) { alert("Excel 解析套件尚未載入，請確認網路可連線，或改用 CSV 貼上匯入。"); return; }
       try {
+        showLoading(true);
+        let workbook;
         const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer);
+        const isCSV = /\.csv$/i.test(file.name);
+
+        if (isCSV) {
+          // CSV：自動偵測編碼（解決 BIG5 亂碼）
+          let text = await readCSVText(buffer);
+          text = text.replace(/^\uFEFF/, ""); // 移除 UTF-8 BOM 字元
+          workbook = XLSX.read(text, { type: "string" });
+        } else {
+          // Excel .xlsx / .xls：編碼已內嵌在格式中，直接解析
+          workbook = XLSX.read(new Uint8Array(buffer), { type: "array" });
+        }
+
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+        // 清除標題列的 BOM 和空白（防止欄位名稱偵測失敗）
+        if (rows[0]) rows[0] = rows[0].map(h => String(h).replace(/^\uFEFF/, "").trim());
+
+        // 過濾全空白行
+        const cleanRows = rows.filter(r => r.some(cell => String(cell).trim() !== ""));
+
         if ($("importMode").value === "summary") {
-          const result = addSummaries(parseSummaryRows(rows, file.name));
+          const result = addSummaries(parseSummaryRows(cleanRows, file.name));
           alert(`已新增 ${result.added} 列廣告商彙整，重複略過 ${result.skipped} 列。`);
         } else {
-          const result = addLeads(parseDetailRows(rows, file.name));
-          alert(`已新增 ${result.added} 筆，更新 ${result.updated} 筆，重複未變更 ${result.skipped} 筆。`);
+          const parsed = parseDetailRows(cleanRows, file.name);
+          if (!parsed.length) { alert("找不到有效資料，請確認檔案內有【姓名】或【電話】欄位。"); return; }
+          const result = addLeads(parsed);
+          alert(`匯入完成！\n新增：${result.added} 筆\n更新：${result.updated} 筆\n重複略過：${result.skipped} 筆`);
         }
       } catch (e) {
         console.error("importFile error", e);
         alert(`檔案解析失敗：${e.message || "請確認格式為 .xlsx 或 .csv"}`);
       } finally {
+        showLoading(false);
         $("fileInput").value = "";
       }
     }
@@ -2164,12 +2435,15 @@
     }
 
     function applyViewMode(mode) {
-      const isAgency = mode === "agency";
+      isAgencyMode = mode === "agency";  // 同步更新全域變數
+      const isAgency = isAgencyMode;
       const isAgencyShare = new URLSearchParams(location.search).get("view") === "agency";
       document.body.classList.toggle("agency-mode", isAgency);
       document.body.classList.toggle("agency-share-mode", isAgencyShare);
       $("modeBadge").textContent = isAgency ? "廣告商檢視" : "內部後台";
       $("brandSubtitle").textContent = isAgency ? "來源渠道、院區與日期彙整" : "名單匯入、渠道追蹤、轉換彙整、主管檢視與 Excel 匯出";
+      $("viewAgencyBtn").style.display = isAgency ? "none" : "";
+      $("viewInternalBtn").style.display = isAgency ? "" : "none";
       $("viewAgencyBtn").classList.toggle("active", isAgency);
       $("viewInternalBtn").classList.toggle("active", !isAgency);
       if (!isAgencyShare) localStorage.setItem(VIEW_STORAGE_KEY, mode);
@@ -2187,6 +2461,13 @@
     }
 
     // ── 初始化 ───────────────────────────────────────────────────
+
+    async function loginSuccess() {
+      $('pwModal').classList.remove('show');
+      applyViewMode("internal");  // 先切換畫面模式，讓 render() 以內部模式執行
+      await loadAllData();
+    }
+
     async function loadAllData() {
       showLoading(true);
       try {
@@ -2220,10 +2501,13 @@
             therapyRules: Array.isArray(saved.therapyRules) && saved.therapyRules.length
               ? saved.therapyRules : DEFAULT_SETTINGS.therapyRules,
             branches: Array.isArray(saved.branches) && saved.branches.length
-              ? saved.branches : DEFAULT_SETTINGS.branches
+              ? saved.branches : DEFAULT_SETTINGS.branches,
+            accounts: Array.isArray(saved.accounts) && saved.accounts.length
+              ? saved.accounts : DEFAULT_SETTINGS.accounts
           };
           summaries = publicData?.reportingSummaries || [];
           agencyDailyBreakdown = publicData?.dailyBreakdown || {};
+          agencyDailyNotes = publicData?.dailyNotes || {};
           leads = []; // 廣告商模式不載入個資
           renderBranchOptions();
           applyViewMode("agency");
@@ -2234,9 +2518,10 @@
         return;
       }
 
-      // 內部模式：直接載入（無需登入）
-      await loadAllData();
-      applyViewMode(localStorage.getItem(VIEW_STORAGE_KEY) || "internal");
+      // 內部模式：每次都需要登入（不記住帳號）
+      showLoading(false);
+      $('pwModal').classList.add('show');
+      setTimeout(() => $('unameInput')?.focus(), 80);
     }
 
     // ── 事件監聽 ─────────────────────────────────────────────────
@@ -2352,6 +2637,10 @@
 
     $("dailyMonthPicker").addEventListener("change", renderDailyChart);
     $("dailyComparePicker").addEventListener("change", renderDailyChart);
+    $("dailyDetailToggle").addEventListener("click", () => {
+      dailyDetailExpanded = !dailyDetailExpanded;
+      renderDailyChart();
+    });
 
     // 匯出下拉選單
     $("exportDropBtn").addEventListener("click", (e) => {
@@ -2412,7 +2701,9 @@
         appSettings = {
           sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...(imported.sourceGroups || {}) },
           therapyRules: Array.isArray(imported.therapyRules) && imported.therapyRules.length ? imported.therapyRules : DEFAULT_SETTINGS.therapyRules,
-          branches: Array.isArray(imported.branches) && imported.branches.length ? imported.branches : DEFAULT_SETTINGS.branches
+          branches: Array.isArray(imported.branches) && imported.branches.length ? imported.branches : DEFAULT_SETTINGS.branches,
+          accounts: Array.isArray(imported.accounts) && imported.accounts.length ? imported.accounts : appSettings.accounts || DEFAULT_SETTINGS.accounts,
+          dailyNotes: (imported.dailyNotes && typeof imported.dailyNotes === 'object') ? imported.dailyNotes : appSettings.dailyNotes || DEFAULT_SETTINGS.dailyNotes
         };
         saveSettings();
         settingsToText();
@@ -2434,8 +2725,105 @@
       render();
     });
 
+    $("addAccountBtn").addEventListener("click", () => {
+      const uname = ($("newUnameInput").value || "").trim();
+      const pw = ($("newPwInput").value || "").trim();
+      if (!uname || !pw) { alert("請輸入帳號和密碼。"); return; }
+      const accounts = appSettings.accounts || DEFAULT_SETTINGS.accounts;
+      if (accounts.some(a => a.username === uname)) { alert(`帳號「${uname}」已存在。`); return; }
+      appSettings.accounts = [...accounts, { username: uname, password: pw }];
+      saveSettings();
+      $("newUnameInput").value = "";
+      $("newPwInput").value = "";
+      renderAccountsList();
+      alert(`帳號「${uname}」已新增並儲存。`);
+    });
+
+    // ── 廣告活動備註事件監聽 ─────────────────────────────────────────
+    $("addNoteBtn").addEventListener("click", () => {
+      const form = $("addNoteForm");
+      $("noteDate").value = today();
+      $("noteText").value = "";
+      form.style.display = form.style.display === "flex" ? "none" : "flex";
+      if (form.style.display === "flex") $("noteText").focus();
+    });
+
+    $("cancelNoteBtn").addEventListener("click", () => {
+      $("addNoteForm").style.display = "none";
+      $("noteDate").value = "";
+      $("noteText").value = "";
+    });
+
+    $("saveNoteBtn").addEventListener("click", () => {
+      const date = $("noteDate").value;
+      const text = ($("noteText").value || "").trim();
+      if (!date) { alert("請選擇日期。"); return; }
+      if (!text) { alert("請輸入備註內容。"); return; }
+      if (!appSettings.dailyNotes) appSettings.dailyNotes = {};
+      appSettings.dailyNotes[date] = text;
+      saveSettings();
+      kvSet('public_data', buildPublicData());
+      $("addNoteForm").style.display = "none";
+      $("noteDate").value = "";
+      $("noteText").value = "";
+      renderAgencyNotes();
+    });
+
+    $("noteText").addEventListener("keydown", e => { if (e.key === "Enter") $("saveNoteBtn").click(); });
+
     // 啟動
     $("createdAtInput").value = today();
+
+    // ── 密碼 Modal 事件 ──────────────────────────────────
+    async function handleLogin() {
+      const uname = ($('unameInput').value || '').trim();
+      const pwd = $('pwInput').value;
+      const accounts = (appSettings && appSettings.accounts) || DEFAULT_SETTINGS.accounts;
+      const matched = accounts.some(a => a.username === uname && a.password === pwd);
+      if (matched) {
+        $('pwError').textContent = '';
+        $('unameInput').value = '';
+        $('pwInput').value = '';
+        await loginSuccess();
+      } else {
+        $('pwError').textContent = '帳號或密碼錯誤，請再試一次';
+        $('pwInput').value = '';
+        $('pwInput').focus();
+      }
+    }
+    $('pwSubmit').addEventListener('click', handleLogin);
+    $('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    $('unameInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('pwInput').focus(); });
+    $('backToAdminBtn').addEventListener('click', () => {
+      $('unameInput').value = '';
+      $('pwInput').value = '';
+      $('pwError').textContent = '';
+      $('pwModal').classList.add('show');
+      setTimeout(() => $('unameInput')?.focus(), 80);
+    });
+    $('agencyViewLink').addEventListener('click', e => {
+      e.preventDefault();
+      $('pwModal').classList.remove('show');
+      showLoading(true);
+      Promise.all([kvGet('public_data'), kvGet('settings')]).then(([publicData, settingsData]) => {
+        const saved = settingsData || {};
+        appSettings = {
+          sourceGroups: { ...DEFAULT_SETTINGS.sourceGroups, ...(saved.sourceGroups || {}) },
+          therapyRules: Array.isArray(saved.therapyRules) && saved.therapyRules.length ? saved.therapyRules : DEFAULT_SETTINGS.therapyRules,
+          branches: Array.isArray(saved.branches) && saved.branches.length ? saved.branches : DEFAULT_SETTINGS.branches,
+          accounts: Array.isArray(saved.accounts) && saved.accounts.length ? saved.accounts : DEFAULT_SETTINGS.accounts,
+          dailyNotes: (saved.dailyNotes && typeof saved.dailyNotes === 'object') ? saved.dailyNotes : DEFAULT_SETTINGS.dailyNotes
+        };
+        summaries = publicData?.reportingSummaries || [];
+        agencyDailyBreakdown = publicData?.dailyBreakdown || {};
+        agencyDailyNotes = publicData?.dailyNotes || {};
+        leads = [];
+        renderBranchOptions();
+        applyViewMode("agency");
+        render();
+      }).finally(() => showLoading(false));
+    });
+
     init();
   </script>
 </body>
